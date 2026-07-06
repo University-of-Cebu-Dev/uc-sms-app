@@ -1,0 +1,6 @@
+export { SettingsTabs } from './SettingsTabs'
+export { EnrollmentSettings } from './EnrollmentSettings'
+export { ProgramsSettings } from './ProgramsSettings'
+export { ThemesSettings } from './ThemesSettings'
+export { SchoolPeriodManager } from './SchoolPeriodManager'
+export { ProgramManager } from './ProgramManager'

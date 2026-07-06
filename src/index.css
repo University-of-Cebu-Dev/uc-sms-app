@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-gh-canvas: #ffffff;
+  --color-gh-canvas-subtle: #f6f8fa;
+  --color-gh-canvas-inset: #f6f8fa;
+  --color-gh-border: #d0d7de;
+  --color-gh-border-muted: #d8dee4;
+  --color-gh-fg: #1f2328;
+  --color-gh-fg-muted: #656d76;
+  --color-gh-fg-subtle: #6e7781;
+  --color-gh-accent: #0969da;
+  --color-gh-accent-emphasis: #0969da;
+  --color-gh-accent-fg: #ffffff;
+  --color-gh-success: #1a7f37;
+  --color-gh-success-subtle: #dafbe1;
+  --color-gh-danger: #cf222e;
+  --color-gh-danger-subtle: #ffebe9;
+  --color-gh-warning: #9a6700;
+  --color-gh-warning-subtle: #fff8c5;
+  --color-gh-attention: #bf8700;
+  --color-gh-sidebar: #f6f8fa;
+  --color-gh-header: #24292f;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.dark {
+  --color-gh-canvas: #0d1117;
+  --color-gh-canvas-subtle: #161b22;
+  --color-gh-canvas-inset: #010409;
+  --color-gh-border: #30363d;
+  --color-gh-border-muted: #21262d;
+  --color-gh-fg: #e6edf3;
+  --color-gh-fg-muted: #8b949e;
+  --color-gh-fg-subtle: #6e7681;
+  --color-gh-accent: #2f81f7;
+  --color-gh-accent-emphasis: #1f6feb;
+  --color-gh-accent-fg: #ffffff;
+  --color-gh-success: #3fb950;
+  --color-gh-success-subtle: #033a16;
+  --color-gh-danger: #f85149;
+  --color-gh-danger-subtle: #490202;
+  --color-gh-warning: #d29922;
+  --color-gh-warning-subtle: #3d2e00;
+  --color-gh-attention: #e3b341;
+  --color-gh-sidebar: #010409;
+  --color-gh-header: #0d1117;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gh-canvas-subtle text-gh-fg;
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-gh-accent;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.25s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-period-select {
+    animation: periodSelect 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-period-check {
+    animation: periodCheck 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-period-bar {
+    animation: periodBar 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes periodSelect {
+  from { opacity: 0.7; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes periodCheck {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes periodBar {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
