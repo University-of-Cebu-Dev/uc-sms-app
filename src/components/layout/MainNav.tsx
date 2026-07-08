@@ -1,20 +1,21 @@
 import { NavLink } from 'react-router-dom'
-import { mainNavItems } from '@/data/navConfig'
+import { mainNavItems, mainNavPrefixPaths } from '@/data/navConfig'
 import { cn } from '@/utils/cn'
 
 export const MainNav = () => {
   return (
     <nav
-      className="flex items-center justify-center gap-0.5 overflow-x-auto"
+      className="flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-thin px-1"
       aria-label="Main navigation"
     >
       {mainNavItems.map(({ label, path, icon: Icon }) => (
         <NavLink
           key={path}
           to={path}
+          end={!mainNavPrefixPaths.includes(path)}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors duration-150',
+              'flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-colors duration-150 sm:px-2.5 sm:text-sm',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gh-accent',
               isActive
                 ? 'bg-gh-canvas-subtle text-gh-fg border-b-2 border-gh-accent rounded-b-none'

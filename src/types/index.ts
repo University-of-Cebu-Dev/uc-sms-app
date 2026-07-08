@@ -8,34 +8,6 @@ export interface User {
   joinedAt: string
 }
 
-export interface Project {
-  id: string
-  name: string
-  description: string
-  status: 'active' | 'completed' | 'on-hold'
-  progress: number
-  members: number
-  updatedAt: string
-}
-
-export interface Task {
-  id: string
-  title: string
-  status: 'todo' | 'in-progress' | 'done'
-  priority: 'low' | 'medium' | 'high'
-  assignee: string
-  dueDate: string
-}
-
-export interface Activity {
-  id: string
-  user: string
-  action: string
-  target: string
-  timestamp: string
-  type: 'commit' | 'issue' | 'pr' | 'comment' | 'deploy'
-}
-
 export interface Notification {
   id: string
   title: string
@@ -45,23 +17,7 @@ export interface Notification {
   type: 'info' | 'success' | 'warning' | 'error'
 }
 
-export interface Transaction {
-  id: string
-  description: string
-  amount: number
-  status: 'completed' | 'pending' | 'failed'
-  date: string
-  category: string
-}
 
-export interface StatCard {
-  id: string
-  label: string
-  value: string
-  change: number
-  changeLabel: string
-  icon: string
-}
 
 export interface NavItem {
   label: string

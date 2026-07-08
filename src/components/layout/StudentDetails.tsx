@@ -1,72 +1,111 @@
 import { useAuth } from '@/hooks/useAuth'
+import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
+import { RoleSwitcher } from '@/components/layout/RoleSwitcher'
+import { Avatar } from '@/components/ui/Avatar'
 import { cn } from '@/utils/cn'
 
 interface StudentDetailsProps {
   isCollapsed: boolean
 }
 
-const getInitials = (name: string) =>
-  name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
 export const StudentDetails = ({ isCollapsed }: StudentDetailsProps) => {
-  const { student } = useAuth()
+  const { user, student } = useAuth()
+  const { activeRoleOption } = useRoleSwitcher()
 
-  if (isCollapsed || !student) return null
+  if (!user) return null
+
+  const displayName = student?.completeName || user.name
+  const showStudentMeta = activeRoleOption.id === 'STUDENT' && student
+
+  if (isCollapsed) {
+    return (
+      <section
+        className="border-b border-gh-border py-3"
+        aria-label="User profile"
+      >
+        <div className="flex justify-center">
+          <div className="relative">
+            <Avatar
+              src={user.avatar}
+              alt={displayName}
+              size="sm"
+              className={cn('ring-2', activeRoleOption.accentRing)}
+            />
+            <span
+              className={cn(
+                'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-gh-sidebar',
+                activeRoleOption.accentBg,
+              )}
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+        <RoleSwitcher isCollapsed />
+      </section>
+    )
+  }
 
   return (
     <section
-      className="relative border-b border-gh-border px-4 py-2.5"
-      aria-label="Student details"
+      className="relative border-b border-gh-border bg-gradient-to-b from-gh-canvas-subtle/60 to-transparent px-4 py-3.5"
+      aria-label="User profile"
     >
       <div
-        className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-gh-accent/60"
+        className={cn(
+          'absolute left-0 top-3 bottom-3 w-1 rounded-full',
+          activeRoleOption.accentBg,
+        )}
         aria-hidden="true"
       />
 
-      <div className="flex items-center gap-2.5 min-w-0">
-        <div
-          className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-            'bg-gh-accent/12 text-gh-accent ring-1 ring-gh-accent/20',
-            'text-[11px] font-bold',
+      <div className="flex items-start gap-3 min-w-0">
+        <Avatar
+          src={user.avatar}
+          alt={displayName}
+          size="md"
+          className={cn('shrink-0 ring-2 shadow-sm', activeRoleOption.accentRing)}
+        />
+
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-gh-fg-subtle">
+            Signed in as
+          </p>
+          <h2 className="text-sm font-semibold text-gh-fg break-words leading-snug">
+            {displayName}
+          </h2>
+
+          {showStudentMeta ? (
+            <dl className="mt-1.5 space-y-1">
+              <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 text-xs text-gh-fg-muted">
+                <div className="flex items-baseline gap-1 min-w-0">
+                  <dt className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
+                    ID
+                  </dt>
+                  <dd className="font-mono text-[11px] text-gh-fg-muted">{student.id}</dd>
+                </div>
+
+                {student.course ? (
+                  <>
+                    <span className="text-gh-fg-subtle select-none" aria-hidden="true">
+                      ·
+                    </span>
+                    <div className="flex items-baseline gap-1 min-w-0">
+                      <dt className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
+                        Course
+                      </dt>
+                      <dd className="break-words">{student.course}</dd>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </dl>
+          ) : (
+            <p className="mt-1 text-xs text-gh-fg-muted truncate">{user.email}</p>
           )}
-          aria-hidden="true"
-        >
-          {getInitials(student.completeName)}
         </div>
-
-        <dl className="min-w-0 flex-1 leading-tight">
-          <dt className="sr-only">Complete Name</dt>
-          <dd className="text-sm font-semibold text-gh-fg break-words">
-            {student.completeName}
-          </dd>
-
-          <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0 text-xs text-gh-fg-muted">
-            <div className="flex items-baseline gap-1 min-w-0">
-              <dt className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
-                ID
-              </dt>
-              <dd className="font-mono text-[11px] text-gh-fg-muted">{student.id}</dd>
-            </div>
-
-            <span className="text-gh-fg-subtle select-none" aria-hidden="true">
-              ·
-            </span>
-
-            <div className="flex items-baseline gap-1 min-w-0">
-              <dt className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
-                Course
-              </dt>
-              <dd className="break-words">{student.course}</dd>
-            </div>
-          </div>
-        </dl>
       </div>
+
+      <RoleSwitcher />
     </section>
   )
 }

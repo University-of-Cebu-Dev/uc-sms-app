@@ -1,22 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { ClipboardList, GraduationCap, Palette, Shield } from 'lucide-react'
+import { enrollmentTabs } from '@/data/navConfig'
 import { cn } from '@/utils/cn'
 
-const tabs = [
-  { label: 'Enrollment', path: '/settings/enrollment', icon: ClipboardList },
-  { label: 'Programs', path: '/settings/programs', icon: GraduationCap },
-  { label: 'Themes', path: '/settings/themes', icon: Palette },
-  { label: 'Roles & Permissions', path: '/settings/roles-permissions', icon: Shield },
-] as const
-
-export function SettingsTabs() {
+export function EnrollmentTabs() {
   return (
     <div className="border-t border-gh-border bg-gh-canvas-subtle/50 px-4 py-2">
       <nav
         className="inline-flex gap-1 rounded-lg border border-gh-border bg-gh-canvas p-1"
-        aria-label="Settings sections"
+        aria-label="Enrollment audience"
       >
-        {tabs.map(({ label, path, icon: Icon }) => (
+        {enrollmentTabs.map(({ label, path, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}
