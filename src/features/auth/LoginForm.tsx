@@ -54,7 +54,7 @@ export function LoginForm() {
       )}
       padding="none"
     >
-      <div className="h-1 bg-gradient-to-r from-gh-accent/40 via-gh-accent to-gh-accent/40" aria-hidden="true" />
+      <div className="h-1 bg-gradient-to-r from-[#003087] via-[#00a8e8] to-[#ffc20e]" aria-hidden="true" />
 
       <div className="p-6 sm:p-8">
         <div className="mb-7 flex flex-col items-center text-center">

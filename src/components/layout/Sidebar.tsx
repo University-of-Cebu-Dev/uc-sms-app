@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Settings,
   ArrowLeft,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
@@ -150,23 +149,6 @@ export const Sidebar = () => {
 
       <div className="border-t border-gh-border py-3 px-2 space-y-0.5 shrink-0">
         <NavLink
-          to="/settings"
-          onClick={close}
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150',
-              isActive
-                ? 'bg-gh-canvas-subtle text-gh-fg'
-                : 'text-gh-fg-muted hover:bg-gh-canvas-subtle hover:text-gh-fg',
-              isCollapsed && 'justify-center px-2',
-            )
-          }
-          title={isCollapsed ? 'Settings' : undefined}
-        >
-          <Settings className="h-4 w-4 shrink-0" />
-          {!isCollapsed && <span>Settings</span>}
-        </NavLink>
-        <NavLink
           to="/profile"
           onClick={close}
           className={({ isActive }) =>
@@ -220,6 +202,7 @@ export const Sidebar = () => {
       )}
 
       <aside
+        data-sidebar
         className={cn(
           'fixed top-0 left-0 z-50 h-full bg-gh-sidebar border-r border-gh-border transition-all duration-300',
           'lg:static lg:translate-x-0',

@@ -1,12 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { Theme } from '@/types'
+import { defaultCustomThemeColors } from '@/data/customThemeDefaults'
+import type { CustomThemeColors, Theme } from '@/types'
+import {
+  applyCustomTheme,
+  clearCustomTheme,
+  loadCustomThemeColors,
+  saveCustomThemeColors,
+} from '@/utils/customTheme'
 import { usersApi } from '@/services/users'
 import { useAuth } from '@/hooks/useAuth'
 
 interface ThemeContextValue {
   theme: Theme
   resolvedTheme: 'light' | 'dark'
+  customColors: CustomThemeColors
   setTheme: (theme: Theme) => void
+  setCustomColors: (colors: CustomThemeColors) => void
+  resetCustomColors: () => void
   toggleTheme: () => void
 }
 
@@ -17,15 +27,31 @@ function getSystemTheme(): 'light' | 'dark' {
 }
 
 function resolveTheme(theme: Theme): 'light' | 'dark' {
+  if (theme === 'uc' || theme === 'custom') return 'light'
   return theme === 'system' ? getSystemTheme() : theme
+}
+
+function applyThemeClasses(theme: Theme, resolved: 'light' | 'dark', colors: CustomThemeColors) {
+  const root = document.documentElement
+  root.classList.toggle('dark', resolved === 'dark')
+  root.classList.toggle('theme-uc', theme === 'uc')
+  root.classList.toggle('theme-custom', theme === 'custom')
+
+  if (theme === 'custom') {
+    applyCustomTheme(colors)
+    return
+  }
+
+  clearCustomTheme()
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem('theme') as Theme | null
-    return stored ?? 'light'
+    return stored ?? 'uc'
   })
+  const [customColors, setCustomColorsState] = useState<CustomThemeColors>(loadCustomThemeColors)
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => resolveTheme(theme))
   const [hydratedFromApi, setHydratedFromApi] = useState(false)
 
@@ -46,13 +72,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const resolved = resolveTheme(theme)
     setResolvedTheme(resolved)
-    document.documentElement.classList.toggle('dark', resolved === 'dark')
+    applyThemeClasses(theme, resolved, customColors)
     localStorage.setItem('theme', theme)
 
     if (isAuthenticated && hydratedFromApi) {
       void usersApi.updatePreferences({ theme }).catch(() => undefined)
     }
-  }, [theme, isAuthenticated, hydratedFromApi])
+  }, [theme, customColors, isAuthenticated, hydratedFromApi])
 
   useEffect(() => {
     if (theme !== 'system') return
@@ -60,16 +86,31 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const handler = () => {
       const resolved = getSystemTheme()
       setResolvedTheme(resolved)
-      document.documentElement.classList.toggle('dark', resolved === 'dark')
+      applyThemeClasses(theme, resolved, customColors)
     }
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
-  }, [theme])
+  }, [theme, customColors])
 
   const setTheme = useCallback((nextTheme: Theme) => setThemeState(nextTheme), [])
+
+  const setCustomColors = useCallback((colors: CustomThemeColors) => {
+    setCustomColorsState(colors)
+    saveCustomThemeColors(colors)
+    setThemeState('custom')
+  }, [])
+
+  const resetCustomColors = useCallback(() => {
+    setCustomColorsState(defaultCustomThemeColors)
+    saveCustomThemeColors(defaultCustomThemeColors)
+    setThemeState('custom')
+  }, [])
+
   const toggleTheme = useCallback(
     () =>
       setThemeState((prev) => {
+        if (prev === 'uc' || prev === 'custom') return 'dark'
+        if (prev === 'dark') return 'uc'
         const current = resolveTheme(prev)
         return current === 'dark' ? 'light' : 'dark'
       }),
@@ -77,7 +118,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        resolvedTheme,
+        customColors,
+        setTheme,
+        setCustomColors,
+        resetCustomColors,
+        toggleTheme,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   )

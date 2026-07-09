@@ -21,6 +21,7 @@ import { EnrollmentSettings } from '@/features/settings/EnrollmentSettings'
 import { ProgramsSettings } from '@/features/settings/ProgramsSettings'
 import { ThemesSettings } from '@/features/settings/ThemesSettings'
 import { RolesSettings } from '@/features/settings/RolesSettings'
+import { AccountsSettings } from '@/features/settings/AccountsSettings'
 import { ModulePlaceholderPage } from '@/pages/ModulePlaceholderPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { moduleNavItems } from '@/data/navConfig'
@@ -86,6 +87,7 @@ export const router = createBrowserRouter([
           { path: 'programs', element: <ProgramsSettings /> },
           { path: 'themes', element: <ThemesSettings /> },
           { path: 'roles-permissions', element: <RolesSettings /> },
+          { path: 'accounts', element: <AccountsSettings /> },
         ],
       },
     ],

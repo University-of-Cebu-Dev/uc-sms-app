@@ -32,6 +32,11 @@ const LOGIN_ERROR_MAP: Record<string, LoginErrorDetails> = {
     message: 'Too many failed sign-in attempts. Your account is locked for 15 minutes.',
     hint: 'Wait a few minutes before trying again.',
   },
+  ACCOUNT_INACTIVE: {
+    title: 'Account inactive',
+    message: 'This account has been deactivated.',
+    hint: 'Contact your administrator if you need access restored.',
+  },
   RATE_LIMITED: {
     title: 'Too many attempts',
     message: 'You have made too many sign-in requests.',
@@ -69,6 +74,10 @@ function mapStatusAndBody(status: number, raw: string): LoginErrorDetails | null
 
   if (lower.includes('locked')) {
     return LOGIN_ERROR_MAP.ACCOUNT_LOCKED
+  }
+
+  if (lower.includes('inactive') || code.includes('ACCOUNT_INACTIVE')) {
+    return LOGIN_ERROR_MAP.ACCOUNT_INACTIVE
   }
 
   if (status === 429 || lower.includes('rate limit')) {

@@ -6,6 +6,9 @@ export interface User {
   role: string
   status: 'active' | 'inactive' | 'pending'
   joinedAt: string
+  firstName: string
+  lastName: string
+  idNumber: string
 }
 
 export interface Notification {
@@ -71,7 +74,14 @@ export interface Student {
   course: string
 }
 
-export type Theme = 'light' | 'dark' | 'system'
+export type Theme = 'light' | 'dark' | 'system' | 'uc' | 'custom'
+
+export interface CustomThemeColors {
+  accent: string
+  accentEmphasis: string
+  sidebar: string
+  attention: string
+}
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 

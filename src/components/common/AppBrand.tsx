@@ -26,7 +26,7 @@ export function AppBrand({
       {showTitle && (
         <span
           className={cn(
-            'font-semibold text-gh-fg text-sm leading-tight',
+            'font-brand font-semibold text-gh-fg text-sm leading-tight',
             titleClassName,
           )}
         >

@@ -264,3 +264,7 @@ export function normalizeIdentityRole(role?: string | null): string {
   if (!role) return 'STUDENT'
   return role.trim().toUpperCase().replace(/\s+/g, '_').replace('/', '_')
 }
+
+export const staffAssignableRoleIds = identityRoleCatalog
+  .map((role) => role.id)
+  .filter((id) => id !== 'STUDENT' && id !== 'GUARDIAN')

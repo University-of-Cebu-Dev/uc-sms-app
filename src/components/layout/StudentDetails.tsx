@@ -3,6 +3,7 @@ import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
 import { RoleSwitcher } from '@/components/layout/RoleSwitcher'
 import { Avatar } from '@/components/ui/Avatar'
 import { cn } from '@/utils/cn'
+import { formatUserDisplayName } from '@/utils/format'
 
 interface StudentDetailsProps {
   isCollapsed: boolean
@@ -14,8 +15,9 @@ export const StudentDetails = ({ isCollapsed }: StudentDetailsProps) => {
 
   if (!user) return null
 
-  const displayName = student?.completeName || user.name
-  const showStudentMeta = activeRoleOption.id === 'STUDENT' && student
+  const displayName = formatUserDisplayName(user)
+  const idNumber = user.idNumber || student?.id || ''
+  const showCourse = activeRoleOption.id === 'STUDENT' && Boolean(student?.course)
 
   if (isCollapsed) {
     return (
@@ -23,31 +25,22 @@ export const StudentDetails = ({ isCollapsed }: StudentDetailsProps) => {
         className="border-b border-gh-border py-3"
         aria-label="User profile"
       >
-        <div className="flex justify-center">
-          <div className="relative">
-            <Avatar
-              src={user.avatar}
-              alt={displayName}
-              size="sm"
-              className={cn('ring-2', activeRoleOption.accentRing)}
-            />
-            <span
-              className={cn(
-                'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-gh-sidebar',
-                activeRoleOption.accentBg,
-              )}
-              aria-hidden="true"
-            />
-          </div>
+        <div className="flex items-center justify-center gap-2 px-2">
+          <Avatar
+            src={user.avatar}
+            alt={displayName}
+            size="sm"
+            className={cn('ring-2', activeRoleOption.accentRing)}
+          />
+          <RoleSwitcher isCollapsed />
         </div>
-        <RoleSwitcher isCollapsed />
       </section>
     )
   }
 
   return (
     <section
-      className="relative border-b border-gh-border bg-gradient-to-b from-gh-canvas-subtle/60 to-transparent px-4 py-3.5"
+      className="relative overflow-visible border-b border-gh-border bg-gradient-to-b from-gh-canvas-subtle/60 to-transparent px-4 py-3.5"
       aria-label="User profile"
     >
       <div
@@ -74,38 +67,22 @@ export const StudentDetails = ({ isCollapsed }: StudentDetailsProps) => {
             {displayName}
           </h2>
 
-          {showStudentMeta ? (
-            <dl className="mt-1.5 space-y-1">
-              <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 text-xs text-gh-fg-muted">
-                <div className="flex items-baseline gap-1 min-w-0">
-                  <dt className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
-                    ID
-                  </dt>
-                  <dd className="font-mono text-[11px] text-gh-fg-muted">{student.id}</dd>
-                </div>
+          {idNumber ? (
+            <p className="mt-1 text-xs text-gh-fg-muted">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
+                ID
+              </span>{' '}
+              <span className="font-mono text-[11px]">{idNumber}</span>
+            </p>
+          ) : null}
 
-                {student.course ? (
-                  <>
-                    <span className="text-gh-fg-subtle select-none" aria-hidden="true">
-                      ·
-                    </span>
-                    <div className="flex items-baseline gap-1 min-w-0">
-                      <dt className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-gh-fg-subtle">
-                        Course
-                      </dt>
-                      <dd className="break-words">{student.course}</dd>
-                    </div>
-                  </>
-                ) : null}
-              </div>
-            </dl>
-          ) : (
-            <p className="mt-1 text-xs text-gh-fg-muted truncate">{user.email}</p>
-          )}
+          {showCourse ? (
+            <p className="mt-1 text-xs text-gh-fg-muted break-words">{student?.course}</p>
+          ) : null}
         </div>
-      </div>
 
-      <RoleSwitcher />
+        <RoleSwitcher className="self-start" />
+      </div>
     </section>
   )
 }

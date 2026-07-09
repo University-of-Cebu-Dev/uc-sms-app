@@ -16,6 +16,7 @@ export const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-30 border-b border-gh-border bg-gh-canvas">
+      <div className="h-0.5 bg-gradient-to-r from-[#003087] via-[#00a8e8] to-[#ffc20e]" aria-hidden="true" />
       <div className="flex h-14 items-center gap-3 px-4">
         <button
           type="button"

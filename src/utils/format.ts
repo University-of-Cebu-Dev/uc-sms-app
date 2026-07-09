@@ -31,3 +31,16 @@ export function formatCurrency(amount: number): string {
 export function formatNumber(num: number): string {
   return new Intl.NumberFormat('en-US').format(num)
 }
+
+export function formatUserDisplayName(user: {
+  firstName?: string
+  lastName?: string
+  name?: string
+}) {
+  const displayName = [user.firstName, user.lastName]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(' ')
+
+  return displayName || user.name || '—'
+}

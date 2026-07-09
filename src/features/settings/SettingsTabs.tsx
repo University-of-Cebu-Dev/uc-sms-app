@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { ClipboardList, GraduationCap, Palette, Shield } from 'lucide-react'
+import { ClipboardList, GraduationCap, Palette, Shield, Users } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 const tabs = [
@@ -7,6 +7,7 @@ const tabs = [
   { label: 'Programs', path: '/settings/programs', icon: GraduationCap },
   { label: 'Themes', path: '/settings/themes', icon: Palette },
   { label: 'Roles & Permissions', path: '/settings/roles-permissions', icon: Shield },
+  { label: 'Accounts', path: '/settings/accounts', icon: Users },
 ] as const
 
 export function SettingsTabs() {

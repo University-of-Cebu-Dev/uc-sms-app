@@ -9,6 +9,9 @@ export const currentUser: User = {
   role: 'Admin',
   status: 'active',
   joinedAt: '2024-01-15',
+  firstName: 'Publio',
+  lastName: 'Sumalinog',
+  idNumber: '000001',
 }
 
 export const currentStudent: Student = {

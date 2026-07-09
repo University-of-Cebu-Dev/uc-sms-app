@@ -11,7 +11,7 @@ export function AuthLayout() {
         aria-hidden="true"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-br from-[#0a3d7a]/85 via-[#0969da]/65 to-[#0d1117]/88"
+        className="absolute inset-0 bg-gradient-to-br from-[#003087]/90 via-[#004799]/80 to-[#001f5c]/95"
         aria-hidden="true"
       />
       <div
