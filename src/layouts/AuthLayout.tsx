@@ -1,8 +1,9 @@
 import { Outlet } from 'react-router-dom'
+import { usePortalBranding } from '@/hooks/usePortalBranding'
 import ucLoginBg from '@/assets/uc-login-bg.jpg'
-import { APP_NAME } from '@/components/common/AppBrand'
 
 export function AuthLayout() {
+  const { schoolName } = usePortalBranding()
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden">
       <div
@@ -23,7 +24,7 @@ export function AuthLayout() {
         <Outlet />
 
         <p className="mt-6 text-center text-xs text-white/65">
-          &copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+          &copy; {new Date().getFullYear()} {schoolName}. All rights reserved.
         </p>
       </div>
     </div>

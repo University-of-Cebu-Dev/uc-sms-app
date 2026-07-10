@@ -1,9 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { ClipboardList, GraduationCap, Palette, Shield, Users } from 'lucide-react'
+import { Building2, ClipboardList, GraduationCap, Palette, Shield, Users } from 'lucide-react'
 import { usePermissions } from '@/hooks/usePermissions'
 import { cn } from '@/utils/cn'
 
 const tabs = [
+  {
+    label: 'General',
+    path: '/settings/general',
+    icon: Building2,
+    permission: 'UCSMS.Modules.Settings.Access',
+  },
   {
     label: 'Enrollment',
     path: '/settings/enrollment',

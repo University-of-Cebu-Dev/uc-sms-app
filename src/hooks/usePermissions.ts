@@ -1,26 +1,24 @@
 import { useMemo } from 'react'
-import { getAccessToken } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
-import { getPermissionsFromToken, getRolesFromToken } from '@/utils/jwt'
+import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
 import { canAccessPath, getAccessibleModules } from '@/utils/moduleAccess'
 
 export function usePermissions() {
   const { isAuthenticated } = useAuth()
+  const { activeRole, activeRolePermissions, isActiveRoleSuperAdmin } = useRoleSwitcher()
 
   return useMemo(() => {
-    const token = getAccessToken()
-    const roles = getRolesFromToken(token)
-    const permissions = new Set(getPermissionsFromToken(token))
-    const isSuperAdmin = roles.some((role) => role.toLowerCase() === 'superadmin')
+    const permissions = activeRolePermissions
 
     return {
-      roles,
+      roles: [activeRole],
       permissions,
-      isSuperAdmin,
-      accessibleModules: getAccessibleModules(permissions, isSuperAdmin),
+      isSuperAdmin: isActiveRoleSuperAdmin,
+      accessibleModules: getAccessibleModules(permissions, isActiveRoleSuperAdmin),
       canAccessPath: (pathname: string) =>
-        isAuthenticated && canAccessPath(pathname, permissions, isSuperAdmin),
-      hasPermission: (permission: string) => isSuperAdmin || permissions.has(permission),
+        isAuthenticated && canAccessPath(pathname, permissions, isActiveRoleSuperAdmin),
+      hasPermission: (permission: string) =>
+        isActiveRoleSuperAdmin || permissions.has(permission),
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, activeRole, activeRolePermissions, isActiveRoleSuperAdmin])
 }

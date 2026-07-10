@@ -16,6 +16,12 @@ const CUSTOM_CSS_VARS = [
   '--color-gh-canvas-subtle',
   '--color-gh-border',
   '--color-gh-fg',
+  '--color-gh-popover',
+  '--color-gh-popover-subtle',
+  '--color-gh-popover-fg',
+  '--color-gh-popover-fg-muted',
+  '--color-gh-popover-border',
+  '--color-gh-popover-accent',
 ] as const
 
 function clamp(value: number) {
@@ -100,6 +106,12 @@ export function applyCustomTheme(colors: CustomThemeColors) {
     '--color-gh-canvas-subtle': canvasSubtle,
     '--color-gh-border': border,
     '--color-gh-fg': foreground,
+    '--color-gh-popover': '#ffffff',
+    '--color-gh-popover-subtle': canvasSubtle,
+    '--color-gh-popover-fg': foreground,
+    '--color-gh-popover-fg-muted': mixHex(foreground, '#ffffff', 0.45),
+    '--color-gh-popover-border': border,
+    '--color-gh-popover-accent': colors.accent,
   }
 
   for (const [key, value] of Object.entries(vars)) {

@@ -59,11 +59,12 @@ export function LoginForm() {
       <div className="p-6 sm:p-8">
         <div className="mb-7 flex flex-col items-center text-center">
           <AppBrand
+            variant="featured"
             className="flex-col items-center gap-4"
             logoClassName="h-14 sm:h-16"
-            titleClassName="text-2xl sm:text-3xl font-bold text-center tracking-tight whitespace-normal"
+            titleClassName="text-xl sm:text-2xl font-bold text-center tracking-tight whitespace-normal text-[#003087]"
           />
-          <p className="mt-3 text-sm text-gh-fg-muted max-w-xs">
+          <p className="mt-4 text-sm text-gh-fg-muted max-w-xs">
             Student portal — sign in to access your account
           </p>
         </div>

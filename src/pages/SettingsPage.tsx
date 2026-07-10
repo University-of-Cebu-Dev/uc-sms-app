@@ -6,7 +6,7 @@ export function SettingsPage() {
     <div className="space-y-6 animate-fade-in max-w-5xl">
       <PageHeader
         title="Settings"
-        description="Manage enrollment periods, programs, and portal appearance."
+        description="Manage campus branding, enrollment periods, programs, and portal appearance."
         breadcrumbs={[{ label: 'Settings' }]}
       />
 

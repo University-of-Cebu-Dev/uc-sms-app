@@ -17,6 +17,7 @@ import { StaffPromissory } from '@/features/enrollment/staff/StaffPromissory'
 import { StaffAdjustments } from '@/features/enrollment/staff/StaffAdjustments'
 import { StaffTracker } from '@/features/enrollment/staff/StaffTracker'
 import { EnrollmentSettings } from '@/features/settings/EnrollmentSettings'
+import { GeneralSettings } from '@/features/settings/GeneralSettings'
 import { ProgramsSettings } from '@/features/settings/ProgramsSettings'
 import { ThemesSettings } from '@/features/settings/ThemesSettings'
 import { RolesSettings } from '@/features/settings/RolesSettings'
@@ -96,7 +97,12 @@ export const router = createBrowserRouter([
           </ModuleProtectedRoute>
         ),
         children: [
-          { index: true, element: <Navigate to="/settings/enrollment" replace /> },
+          { index: true, element: <Navigate to="/settings/general" replace /> },
+          { path: 'general', element: (
+            <ModuleProtectedRoute path="/settings/general">
+              <GeneralSettings />
+            </ModuleProtectedRoute>
+          ) },
           { path: 'enrollment', element: (
             <ModuleProtectedRoute path="/settings/enrollment">
               <EnrollmentSettings />

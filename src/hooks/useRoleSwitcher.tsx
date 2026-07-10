@@ -15,6 +15,12 @@ import {
   normalizeIdentityRole,
   type IdentityRoleMeta,
 } from '@/data/identityRoles'
+import { portalModules, rolesPermissionsManage } from '@/data/modulePermissions'
+import {
+  getDefaultPermissionsForRole,
+  isSuperAdminRole,
+} from '@/data/rolePermissionDefaults'
+import { rolesApi } from '@/services/roles'
 import { getRolesFromToken } from '@/utils/jwt'
 
 const STORAGE_KEY = 'uc-sms-active-role'
@@ -24,6 +30,9 @@ interface RoleSwitcherContextValue {
   activeRoleOption: IdentityRoleMeta
   availableRoles: IdentityRoleMeta[]
   canSwitchRoles: boolean
+  activeRolePermissions: Set<string>
+  isActiveRoleSuperAdmin: boolean
+  getPermissionsForRole: (role: string) => Set<string>
   setActiveRole: (role: string) => void
 }
 
@@ -64,6 +73,30 @@ function resolveActiveRole(assignedRoleIds: string[], userRole?: string | null) 
   return assignedRoleIds[0] ?? 'STUDENT'
 }
 
+function getSuperAdminPermissions() {
+  return new Set([
+    ...portalModules.map((module) => module.accessPermission),
+    rolesPermissionsManage,
+  ])
+}
+
+function toPermissionSet(permissions: string[]) {
+  return new Set(permissions)
+}
+
+async function loadRolePermissions(roleId: string) {
+  if (isSuperAdminRole(roleId)) {
+    return getSuperAdminPermissions()
+  }
+
+  try {
+    const permissions = await rolesApi.getPermissions(roleId)
+    return toPermissionSet(permissions)
+  } catch {
+    return toPermissionSet(getDefaultPermissionsForRole(roleId))
+  }
+}
+
 export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { addToast } = useToast()
@@ -84,6 +117,10 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
     resolveActiveRole(getAssignedRoleIds(user?.role), user?.role),
   )
 
+  const [rolePermissionsByRole, setRolePermissionsByRole] = useState<Record<string, Set<string>>>(
+    {},
+  )
+
   useEffect(() => {
     if (!user) {
       setActiveRoleState('STUDENT')
@@ -92,6 +129,51 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
 
     setActiveRoleState(resolveActiveRole(assignedRoleIds, user.role))
   }, [user, assignedRoleIds])
+
+  useEffect(() => {
+    if (!user || assignedRoleIds.length === 0) {
+      setRolePermissionsByRole({})
+      return
+    }
+
+    let cancelled = false
+
+    void Promise.all(
+      assignedRoleIds.map(async (roleId) => {
+        const permissions = await loadRolePermissions(roleId)
+        return [roleId, permissions] as const
+      }),
+    ).then((results) => {
+      if (cancelled) return
+      setRolePermissionsByRole(Object.fromEntries(results))
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [user, assignedRoleIds.join('|')])
+
+  const getPermissionsForRole = useCallback(
+    (role: string) => {
+      const normalized = normalizeIdentityRole(role)
+
+      if (isSuperAdminRole(normalized)) {
+        return getSuperAdminPermissions()
+      }
+
+      return (
+        rolePermissionsByRole[normalized] ?? toPermissionSet(getDefaultPermissionsForRole(normalized))
+      )
+    },
+    [rolePermissionsByRole],
+  )
+
+  const activeRolePermissions = useMemo(
+    () => getPermissionsForRole(activeRole),
+    [activeRole, getPermissionsForRole],
+  )
+
+  const isActiveRoleSuperAdmin = isSuperAdminRole(activeRole)
 
   const setActiveRole = useCallback(
     (role: string) => {
@@ -115,9 +197,20 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
       activeRoleOption: getIdentityRoleMeta(activeRole),
       availableRoles,
       canSwitchRoles,
+      activeRolePermissions,
+      isActiveRoleSuperAdmin,
+      getPermissionsForRole,
       setActiveRole,
     }),
-    [activeRole, availableRoles, canSwitchRoles, setActiveRole],
+    [
+      activeRole,
+      availableRoles,
+      canSwitchRoles,
+      activeRolePermissions,
+      isActiveRoleSuperAdmin,
+      getPermissionsForRole,
+      setActiveRole,
+    ],
   )
 
   return <RoleSwitcherContext.Provider value={value}>{children}</RoleSwitcherContext.Provider>
