@@ -1,14 +1,23 @@
 import { NavLink } from 'react-router-dom'
 import { mainNavItems, mainNavPrefixPaths } from '@/data/navConfig'
+import { usePermissions } from '@/hooks/usePermissions'
 import { cn } from '@/utils/cn'
 
 export const MainNav = () => {
+  const { canAccessPath } = usePermissions()
+
+  const visibleItems = mainNavItems.filter((item) => canAccessPath(item.path))
+
+  if (visibleItems.length === 0) {
+    return null
+  }
+
   return (
     <nav
       className="flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-thin px-1"
       aria-label="Main navigation"
     >
-      {mainNavItems.map(({ label, path, icon: Icon }) => (
+      {visibleItems.map(({ label, path, icon: Icon }) => (
         <NavLink
           key={path}
           to={path}

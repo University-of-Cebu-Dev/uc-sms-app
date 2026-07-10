@@ -90,7 +90,7 @@ export const mainNavItems: MainNavItem[] = [
   { label: 'Settings', path: '/settings', icon: Settings },
 ]
 
-export type EnrollmentAudience = 'student' | 'parent' | 'staff' | 'faculty'
+export type EnrollmentAudience = 'student' | 'parent' | 'staff'
 
 export interface EnrollmentTabItem {
   label: string
@@ -122,14 +122,6 @@ export const enrollmentTabs: EnrollmentTabItem[] = [
     icon: Briefcase,
     description: 'Staff access to review and manage student enrollments.',
   },
-  {
-    label: 'Faculty',
-    path: '/enrollment/faculty',
-    audience: 'faculty',
-    icon: BookOpen,
-    description: 'Faculty enrollment and teaching assignments.',
-  },
-  
 ]
 
 export const staffEnrollmentSections: SectionNavItem[] = [

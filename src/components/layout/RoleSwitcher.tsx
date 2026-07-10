@@ -11,7 +11,8 @@ interface RoleSwitcherProps {
 }
 
 export function RoleSwitcher({ isCollapsed = false, className }: RoleSwitcherProps) {
-  const { activeRole, activeRoleOption, availableRoles, setActiveRole } = useRoleSwitcher()
+  const { activeRole, activeRoleOption, availableRoles, canSwitchRoles, setActiveRole } =
+    useRoleSwitcher()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -47,6 +48,10 @@ export function RoleSwitcher({ isCollapsed = false, className }: RoleSwitcherPro
       }
     }
     setOpen(false)
+  }
+
+  if (!canSwitchRoles) {
+    return null
   }
 
   return (

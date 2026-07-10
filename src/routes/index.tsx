@@ -7,7 +7,6 @@ import { ProfilePage } from '@/pages/ProfilePage'
 import { EnrollmentPage } from '@/pages/EnrollmentPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import {
-  FacultyEnrollment,
   ParentEnrollment,
   StudentEnrollment,
 } from '@/features/enrollment'
@@ -26,10 +25,15 @@ import { ModulePlaceholderPage } from '@/pages/ModulePlaceholderPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { moduleNavItems } from '@/data/navConfig'
 import { ProtectedRoute, GuestRoute } from '@/components/auth/ProtectedRoute'
+import { ModuleProtectedRoute } from '@/components/auth/ModuleProtectedRoute'
 
 const moduleRoutes = moduleNavItems.map((item) => ({
   path: item.path,
-  element: <ModulePlaceholderPage />,
+  element: (
+    <ModuleProtectedRoute path={item.path}>
+      <ModulePlaceholderPage />
+    </ModuleProtectedRoute>
+  ),
 }))
 
 export const router = createBrowserRouter([
@@ -52,11 +56,19 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: '/dashboard', element: <DashboardPage /> },
+      { path: '/dashboard', element: (
+        <ModuleProtectedRoute path="/dashboard">
+          <DashboardPage />
+        </ModuleProtectedRoute>
+      ) },
       { path: '/profile', element: <ProfilePage /> },
       {
         path: '/enrollment',
-        element: <EnrollmentPage />,
+        element: (
+          <ModuleProtectedRoute path="/enrollment">
+            <EnrollmentPage />
+          </ModuleProtectedRoute>
+        ),
         children: [
           { index: true, element: <Navigate to="/enrollment/student" replace /> },
           { path: 'parent', element: <ParentEnrollment /> },
@@ -73,21 +85,43 @@ export const router = createBrowserRouter([
               { path: 'tracker', element: <StaffTracker /> },
             ],
           },
-          { path: 'faculty', element: <FacultyEnrollment /> },
-          
         ],
       },
       ...moduleRoutes,
       {
         path: '/settings',
-        element: <SettingsPage />,
+        element: (
+          <ModuleProtectedRoute path="/settings">
+            <SettingsPage />
+          </ModuleProtectedRoute>
+        ),
         children: [
           { index: true, element: <Navigate to="/settings/enrollment" replace /> },
-          { path: 'enrollment', element: <EnrollmentSettings /> },
-          { path: 'programs', element: <ProgramsSettings /> },
-          { path: 'themes', element: <ThemesSettings /> },
-          { path: 'roles-permissions', element: <RolesSettings /> },
-          { path: 'accounts', element: <AccountsSettings /> },
+          { path: 'enrollment', element: (
+            <ModuleProtectedRoute path="/settings/enrollment">
+              <EnrollmentSettings />
+            </ModuleProtectedRoute>
+          ) },
+          { path: 'programs', element: (
+            <ModuleProtectedRoute path="/settings/programs">
+              <ProgramsSettings />
+            </ModuleProtectedRoute>
+          ) },
+          { path: 'themes', element: (
+            <ModuleProtectedRoute path="/settings/themes">
+              <ThemesSettings />
+            </ModuleProtectedRoute>
+          ) },
+          { path: 'roles-permissions', element: (
+            <ModuleProtectedRoute path="/settings/roles-permissions">
+              <RolesSettings />
+            </ModuleProtectedRoute>
+          ) },
+          { path: 'accounts', element: (
+            <ModuleProtectedRoute path="/settings/accounts">
+              <AccountsSettings />
+            </ModuleProtectedRoute>
+          ) },
         ],
       },
     ],

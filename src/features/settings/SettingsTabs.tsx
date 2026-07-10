@@ -1,23 +1,63 @@
 import { NavLink } from 'react-router-dom'
 import { ClipboardList, GraduationCap, Palette, Shield, Users } from 'lucide-react'
+import { usePermissions } from '@/hooks/usePermissions'
 import { cn } from '@/utils/cn'
 
 const tabs = [
-  { label: 'Enrollment', path: '/settings/enrollment', icon: ClipboardList },
-  { label: 'Programs', path: '/settings/programs', icon: GraduationCap },
-  { label: 'Themes', path: '/settings/themes', icon: Palette },
-  { label: 'Roles & Permissions', path: '/settings/roles-permissions', icon: Shield },
-  { label: 'Accounts', path: '/settings/accounts', icon: Users },
+  {
+    label: 'Enrollment',
+    path: '/settings/enrollment',
+    icon: ClipboardList,
+    permission: 'UCSMS.Modules.Settings.Access',
+  },
+  {
+    label: 'Programs',
+    path: '/settings/programs',
+    icon: GraduationCap,
+    permission: 'UCSMS.Modules.Settings.Access',
+  },
+  {
+    label: 'Themes',
+    path: '/settings/themes',
+    icon: Palette,
+    permission: 'UCSMS.Modules.Settings.Access',
+  },
+  {
+    label: 'Roles & Permissions',
+    path: '/settings/roles-permissions',
+    icon: Shield,
+    permission: 'UCSMS.Modules.RolesPermissions.Access',
+  },
+  {
+    label: 'Accounts',
+    path: '/settings/accounts',
+    icon: Users,
+    superAdminOnly: true,
+  },
 ] as const
 
 export function SettingsTabs() {
+  const { hasPermission, isSuperAdmin } = usePermissions()
+
+  const visibleTabs = tabs.filter((tab) => {
+    if ('superAdminOnly' in tab) {
+      return isSuperAdmin
+    }
+
+    return hasPermission(tab.permission)
+  })
+
+  if (visibleTabs.length === 0) {
+    return null
+  }
+
   return (
     <div className="border-t border-gh-border bg-gh-canvas-subtle/50 px-4 py-2">
       <nav
         className="inline-flex gap-1 rounded-lg border border-gh-border bg-gh-canvas p-1"
         aria-label="Settings sections"
       >
-        {tabs.map(({ label, path, icon: Icon }) => (
+        {visibleTabs.map(({ label, path, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}

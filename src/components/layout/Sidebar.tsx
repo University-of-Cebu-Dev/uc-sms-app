@@ -13,6 +13,8 @@ import { useSidebar } from '@/hooks/useSidebar'
 import { useSchoolPeriod } from '@/hooks/useSchoolPeriod'
 import { useToast } from '@/hooks/useToast'
 import { useAuth } from '@/hooks/useAuth'
+import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
+import { getStaffEnrollmentTabLabel } from '@/data/identityRoles'
 import { SchoolPeriodItem } from '@/components/layout/SchoolPeriodItem'
 import { StudentDetails } from '@/components/layout/StudentDetails'
 import { AppBrand } from '@/components/common/AppBrand'
@@ -26,6 +28,8 @@ export const Sidebar = () => {
   const { periods, selectedPeriodId, setSelectedPeriodId } = useSchoolPeriod()
   const { addToast } = useToast()
   const { logout } = useAuth()
+  const { activeRoleOption } = useRoleSwitcher()
+  const staffEnrollmentLabel = getStaffEnrollmentTabLabel(activeRoleOption)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const isStaffEnrollment = pathname.startsWith('/enrollment/staff')
@@ -116,7 +120,7 @@ export const Sidebar = () => {
               </p>
               <p className="text-[11px] text-gh-fg-subtle mt-0.5">
                 {isStaffEnrollment
-                  ? 'Choose a period for staff enrollment'
+                  ? `Choose a period for ${staffEnrollmentLabel.toLowerCase()} enrollment`
                   : 'Select a period to enroll'}
               </p>
             </div>

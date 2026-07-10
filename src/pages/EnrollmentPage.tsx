@@ -1,6 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { staffEnrollmentSections } from '@/data/navConfig'
+import { getStaffEnrollmentTabLabel } from '@/data/identityRoles'
+import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
 
 const staffSectionByPath = Object.fromEntries(
   staffEnrollmentSections.map((section) => [section.path, section.label]),
@@ -8,8 +10,10 @@ const staffSectionByPath = Object.fromEntries(
 
 export function EnrollmentPage() {
   const { pathname } = useLocation()
+  const { activeRoleOption } = useRoleSwitcher()
   const isStaff = pathname.startsWith('/enrollment/staff')
   const staffSectionTitle = staffSectionByPath[pathname]
+  const staffTabLabel = getStaffEnrollmentTabLabel(activeRoleOption)
 
   return (
     <div className="w-full space-y-6 animate-fade-in">
@@ -24,7 +28,7 @@ export function EnrollmentPage() {
           isStaff
             ? [
                 { label: 'Enrollment', path: '/enrollment/staff/registration' },
-                { label: 'Staff', path: '/enrollment/staff/registration' },
+                { label: staffTabLabel, path: '/enrollment/staff/registration' },
                 ...(staffSectionTitle ? [{ label: staffSectionTitle }] : []),
               ]
             : [{ label: 'Enrollment' }]

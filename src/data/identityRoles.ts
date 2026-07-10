@@ -58,7 +58,6 @@ export const identityRoleCatalog: IdentityRoleMeta[] = [
     accent: 'text-emerald-600 dark:text-emerald-400',
     accentBg: 'bg-emerald-500/10',
     accentRing: 'ring-emerald-500/25',
-    enrollmentPath: '/enrollment/faculty',
   },
   {
     id: 'CHAIRPERSON',
@@ -268,3 +267,9 @@ export function normalizeIdentityRole(role?: string | null): string {
 export const staffAssignableRoleIds = identityRoleCatalog
   .map((role) => role.id)
   .filter((id) => id !== 'STUDENT' && id !== 'GUARDIAN')
+
+export const STAFF_ENROLLMENT_PATH = '/enrollment/staff'
+
+export function getStaffEnrollmentTabLabel(role: IdentityRoleMeta) {
+  return role.enrollmentPath === STAFF_ENROLLMENT_PATH ? role.label : 'Staff'
+}

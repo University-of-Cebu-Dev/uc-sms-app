@@ -38,7 +38,7 @@ export function LoginForm() {
 
     try {
       await login(data.email, data.password, data.rememberMe)
-      navigate('/dashboard')
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       setLoginError(getLoginErrorDetails(error))
     } finally {

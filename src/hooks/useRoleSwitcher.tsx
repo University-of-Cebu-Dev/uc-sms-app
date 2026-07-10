@@ -9,12 +9,13 @@ import {
 } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
+import { getAccessToken } from '@/lib/api'
 import {
   getIdentityRoleMeta,
-  identityRoleCatalog,
   normalizeIdentityRole,
   type IdentityRoleMeta,
 } from '@/data/identityRoles'
+import { getRolesFromToken } from '@/utils/jwt'
 
 const STORAGE_KEY = 'uc-sms-active-role'
 
@@ -22,6 +23,7 @@ interface RoleSwitcherContextValue {
   activeRole: string
   activeRoleOption: IdentityRoleMeta
   availableRoles: IdentityRoleMeta[]
+  canSwitchRoles: boolean
   setActiveRole: (role: string) => void
 }
 
@@ -32,12 +34,55 @@ function readStoredRole(): string | null {
   return stored ? normalizeIdentityRole(stored) : null
 }
 
+function getAssignedRoleIds(userRole?: string | null) {
+  const fromToken = getRolesFromToken(getAccessToken()).map(normalizeIdentityRole)
+  const unique = [...new Set(fromToken.filter(Boolean))]
+
+  if (unique.length > 0) {
+    return unique
+  }
+
+  if (userRole) {
+    return [normalizeIdentityRole(userRole)]
+  }
+
+  return ['STUDENT']
+}
+
+function resolveActiveRole(assignedRoleIds: string[], userRole?: string | null) {
+  const stored = readStoredRole()
+  const normalizedUserRole = userRole ? normalizeIdentityRole(userRole) : null
+
+  if (stored && assignedRoleIds.includes(stored)) {
+    return stored
+  }
+
+  if (normalizedUserRole && assignedRoleIds.includes(normalizedUserRole)) {
+    return normalizedUserRole
+  }
+
+  return assignedRoleIds[0] ?? 'STUDENT'
+}
+
 export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { addToast } = useToast()
-  const [activeRole, setActiveRoleState] = useState<string>(() => {
-    return readStoredRole() ?? normalizeIdentityRole(user?.role)
-  })
+
+  const assignedRoleIds = useMemo(
+    () => getAssignedRoleIds(user?.role),
+    [user?.role],
+  )
+
+  const availableRoles = useMemo(
+    () => assignedRoleIds.map(getIdentityRoleMeta),
+    [assignedRoleIds],
+  )
+
+  const canSwitchRoles = assignedRoleIds.length >= 2
+
+  const [activeRole, setActiveRoleState] = useState<string>(() =>
+    resolveActiveRole(getAssignedRoleIds(user?.role), user?.role),
+  )
 
   useEffect(() => {
     if (!user) {
@@ -45,24 +90,23 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    const stored = readStoredRole()
-    if (!stored) {
-      setActiveRoleState(normalizeIdentityRole(user.role))
-    }
-  }, [user])
-
-  const availableRoles = useMemo(() => identityRoleCatalog, [])
+    setActiveRoleState(resolveActiveRole(assignedRoleIds, user.role))
+  }, [user, assignedRoleIds])
 
   const setActiveRole = useCallback(
     (role: string) => {
       const normalized = normalizeIdentityRole(role)
+      if (!assignedRoleIds.includes(normalized)) {
+        return
+      }
+
       setActiveRoleState(normalized)
       sessionStorage.setItem(STORAGE_KEY, normalized)
 
       const option = getIdentityRoleMeta(normalized)
       addToast('success', 'Role switched', `Viewing the portal as ${option.label}`)
     },
-    [addToast],
+    [addToast, assignedRoleIds],
   )
 
   const value = useMemo(
@@ -70,9 +114,10 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
       activeRole,
       activeRoleOption: getIdentityRoleMeta(activeRole),
       availableRoles,
+      canSwitchRoles,
       setActiveRole,
     }),
-    [activeRole, availableRoles, setActiveRole],
+    [activeRole, availableRoles, canSwitchRoles, setActiveRole],
   )
 
   return <RoleSwitcherContext.Provider value={value}>{children}</RoleSwitcherContext.Provider>
