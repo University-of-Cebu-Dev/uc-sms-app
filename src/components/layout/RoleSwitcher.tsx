@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
-import { getIdentityRoleMeta, normalizeIdentityRole } from '@/data/identityRoles'
-import { isSuperAdminRole } from '@/data/rolePermissionDefaults'
+import { getIdentityRoleMeta, isSuperAdminRole, normalizeIdentityRole } from '@/data/identityRoles'
+import {
+  isStaffSectionAllowedForRole,
+  STAFF_OVERVIEW_PATH,
+} from '@/data/staffEnrollmentByRole'
 import { canAccessPath } from '@/utils/moduleAccess'
 import { cn } from '@/utils/cn'
 
@@ -52,7 +55,15 @@ export function RoleSwitcher({ isCollapsed = false, className }: RoleSwitcherPro
 
       let nextPath = pathname
       if (option.enrollmentPath && pathname.startsWith('/enrollment')) {
-        nextPath = option.enrollmentPath
+        nextPath =
+          option.enrollmentPath === '/enrollment/staff'
+            ? STAFF_OVERVIEW_PATH
+            : option.enrollmentPath
+      } else if (
+        pathname.startsWith('/enrollment/staff') &&
+        !isStaffSectionAllowedForRole(pathname, normalized)
+      ) {
+        nextPath = STAFF_OVERVIEW_PATH
       } else if (!canAccessPath(pathname, permissions, isSuperAdmin)) {
         nextPath = '/dashboard'
       }

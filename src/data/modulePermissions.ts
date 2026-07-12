@@ -139,6 +139,14 @@ export const portalModules: PortalModule[] = [
 
 export const rolesPermissionsManage = 'UCSMS.Modules.RolesPermissions.Manage'
 
+export const dashboardModulePermission =
+  portalModules.find((module) => module.id === 'dashboard')?.accessPermission ??
+  'UCSMS.Modules.Dashboard.Access'
+
+export function getDashboardOnlyPermissions() {
+  return new Set([dashboardModulePermission])
+}
+
 export function isModulePermission(permission: string) {
   return permission.startsWith(MODULE_PERMISSION_PREFIX)
 }

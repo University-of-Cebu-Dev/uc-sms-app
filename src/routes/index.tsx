@@ -11,6 +11,8 @@ import {
   StudentEnrollment,
 } from '@/features/enrollment'
 import { StaffEnrollmentLayout } from '@/features/enrollment/staff/StaffEnrollmentLayout'
+import { StaffRoleOverview } from '@/features/enrollment/staff/StaffRoleOverview'
+import { StaffSectionPlaceholder } from '@/features/enrollment/staff/StaffSectionPlaceholder'
 import { StaffRegistration } from '@/features/enrollment/staff/StaffRegistration'
 import { StaffEnrolledSubjects } from '@/features/enrollment/staff/StaffEnrolledSubjects'
 import { StaffPromissory } from '@/features/enrollment/staff/StaffPromissory'
@@ -78,7 +80,14 @@ export const router = createBrowserRouter([
             path: 'staff',
             element: <StaffEnrollmentLayout />,
             children: [
-              { index: true, element: <Navigate to="/enrollment/staff/registration" replace /> },
+              { index: true, element: <Navigate to="/enrollment/staff/overview" replace /> },
+              { path: 'overview', element: <StaffRoleOverview /> },
+              { path: 'payments', element: <StaffSectionPlaceholder /> },
+              { path: 'fee-assessment', element: <StaffSectionPlaceholder /> },
+              { path: 'billing', element: <StaffSectionPlaceholder /> },
+              { path: 'student-services', element: <StaffSectionPlaceholder /> },
+              { path: 'approvals', element: <StaffSectionPlaceholder /> },
+              { path: 'reports', element: <StaffSectionPlaceholder /> },
               { path: 'registration', element: <StaffRegistration /> },
               { path: 'enrolled-subjects', element: <StaffEnrolledSubjects /> },
               { path: 'promissory', element: <StaffPromissory /> },

@@ -12,14 +12,15 @@ import { useToast } from '@/hooks/useToast'
 import { getAccessToken } from '@/lib/api'
 import {
   getIdentityRoleMeta,
+  isSuperAdminRole,
   normalizeIdentityRole,
   type IdentityRoleMeta,
 } from '@/data/identityRoles'
-import { portalModules, rolesPermissionsManage } from '@/data/modulePermissions'
 import {
-  getDefaultPermissionsForRole,
-  isSuperAdminRole,
-} from '@/data/rolePermissionDefaults'
+  getDashboardOnlyPermissions,
+  portalModules,
+  rolesPermissionsManage,
+} from '@/data/modulePermissions'
 import { rolesApi } from '@/services/roles'
 import { getRolesFromToken } from '@/utils/jwt'
 
@@ -93,7 +94,7 @@ async function loadRolePermissions(roleId: string) {
     const permissions = await rolesApi.getPermissions(roleId)
     return toPermissionSet(permissions)
   } catch {
-    return toPermissionSet(getDefaultPermissionsForRole(roleId))
+    return getDashboardOnlyPermissions()
   }
 }
 
@@ -161,9 +162,7 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
         return getSuperAdminPermissions()
       }
 
-      return (
-        rolePermissionsByRole[normalized] ?? toPermissionSet(getDefaultPermissionsForRole(normalized))
-      )
+      return rolePermissionsByRole[normalized] ?? getDashboardOnlyPermissions()
     },
     [rolePermissionsByRole],
   )

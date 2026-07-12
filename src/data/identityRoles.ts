@@ -273,3 +273,7 @@ export const STAFF_ENROLLMENT_PATH = '/enrollment/staff'
 export function getStaffEnrollmentTabLabel(role: IdentityRoleMeta) {
   return role.enrollmentPath === STAFF_ENROLLMENT_PATH ? role.label : 'Staff'
 }
+
+export function isSuperAdminRole(role?: string | null) {
+  return normalizeIdentityRole(role).toLowerCase() === 'superadmin'
+}

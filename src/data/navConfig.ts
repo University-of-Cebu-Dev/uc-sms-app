@@ -5,20 +5,15 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
-  ClipboardList,
-  FileText,
   GraduationCap,
   LayoutDashboard,
   ListChecks,
-  Route,
   Settings,
-  SlidersHorizontal,
   Star,
   UserPlus,
   Users,
   type LucideIcon,
 } from 'lucide-react'
-import type { SectionNavItem } from '@/components/layout/SectionNav'
 
 export interface MainNavItem {
   label: string
@@ -121,38 +116,5 @@ export const enrollmentTabs: EnrollmentTabItem[] = [
     audience: 'staff',
     icon: Briefcase,
     description: 'Staff access to review and manage student enrollments.',
-  },
-]
-
-export const staffEnrollmentSections: SectionNavItem[] = [
-  {
-    label: 'Registration',
-    path: '/enrollment/staff/registration',
-    icon: ClipboardList,
-    description: 'Student registration',
-  },
-  {
-    label: 'Enrolled Subjects',
-    path: '/enrollment/staff/enrolled-subjects',
-    icon: BookOpen,
-    description: 'Subject enrollments',
-  },
-  {
-    label: 'Promissory',
-    path: '/enrollment/staff/promissory',
-    icon: FileText,
-    description: 'Promissory notes',
-  },
-  {
-    label: 'Adjustments',
-    path: '/enrollment/staff/adjustments',
-    icon: SlidersHorizontal,
-    description: 'Enrollment changes',
-  },
-  {
-    label: 'Tracker',
-    path: '/enrollment/staff/tracker',
-    icon: Route,
-    description: 'Status tracking',
   },
 ]

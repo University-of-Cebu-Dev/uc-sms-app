@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import { CalendarDays, Sparkles } from 'lucide-react'
-import { staffEnrollmentSections } from '@/data/navConfig'
+import { CalendarDays } from 'lucide-react'
+import { getStaffEnrollmentConfig, getStaffSidebarSections } from '@/data/staffEnrollmentByRole'
+import { getStaffEnrollmentTabLabel } from '@/data/identityRoles'
+import { useRoleSwitcher } from '@/hooks/useRoleSwitcher'
 import { cn } from '@/utils/cn'
 
 interface StaffSidebarMenuProps {
@@ -14,28 +16,30 @@ export function StaffSidebarMenu({
   onReselectPeriod,
   onNavigate,
 }: StaffSidebarMenuProps) {
+  const { activeRole, activeRoleOption } = useRoleSwitcher()
+  const roleConfig = getStaffEnrollmentConfig(activeRole)
+  const sections = getStaffSidebarSections(activeRole)
+  const roleLabel = getStaffEnrollmentTabLabel(activeRoleOption)
+  const sidebarTitle = roleConfig?.sidebarTitle ?? `${roleLabel} enrollment`
+  const sidebarDescription =
+    roleConfig?.sidebarDescription ??
+    'Manage student enrollments for the selected school period.'
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {!isCollapsed && (
         <div className="mx-3 mt-2 rounded-xl border border-gh-border/80 bg-gradient-to-br from-gh-accent/[0.06] via-gh-canvas to-gh-canvas px-4 py-3.5 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5 text-gh-accent" aria-hidden="true" />
-            <p className="text-xs font-semibold uppercase tracking-wider text-gh-fg-muted">
-              Enrollment
-            </p>
-          </div>
-          <p className="mt-1.5 text-[12px] leading-relaxed text-gh-fg-subtle">
-            Manage student enrollments for the selected school period.
+          <p className="text-xs font-semibold uppercase tracking-wider text-gh-fg-muted">
+            {roleLabel}
           </p>
+          <p className="mt-1 text-sm font-semibold text-gh-fg">{sidebarTitle}</p>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-gh-fg-subtle">{sidebarDescription}</p>
         </div>
       )}
 
-      <nav
-        className="flex-1 overflow-y-auto px-2 py-3"
-        aria-label="Enrollment sections"
-      >
+      <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label="Enrollment sections">
         <ul className="space-y-1">
-          {staffEnrollmentSections.map(({ label, path, icon: Icon, end, description }) => (
+          {sections.map(({ label, path, icon: Icon, end, description }) => (
             <li key={path}>
               <NavLink
                 to={path}
