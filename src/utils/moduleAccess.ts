@@ -20,7 +20,7 @@ export function canAccessPath(
 ) {
   if (isSuperAdmin) return true
 
-  if (pathname.startsWith('/settings/accounts')) {
+  if (pathname.startsWith('/settings/accounts') || pathname.startsWith('/settings/themes')) {
     return false
   }
 

@@ -26,7 +26,7 @@ const tabs = [
     label: 'Themes',
     path: '/settings/themes',
     icon: Palette,
-    permission: 'UCSMS.Modules.Settings.Access',
+    superAdminOnly: true,
   },
   {
     label: 'Roles & Permissions',

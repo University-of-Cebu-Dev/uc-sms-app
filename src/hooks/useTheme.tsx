@@ -1,19 +1,21 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { defaultCustomThemeColors } from '@/data/customThemeDefaults'
+import { defaultPortalBranding } from '@/data/portalBrandingDefaults'
+import { usePermissions } from '@/hooks/usePermissions'
+import { usePortalBranding } from '@/hooks/usePortalBranding'
+import { useToast } from '@/hooks/useToast'
 import type { CustomThemeColors, Theme } from '@/types'
 import {
   applyCustomTheme,
   clearCustomTheme,
-  loadCustomThemeColors,
   saveCustomThemeColors,
 } from '@/utils/customTheme'
-import { usersApi } from '@/services/users'
-import { useAuth } from '@/hooks/useAuth'
 
 interface ThemeContextValue {
   theme: Theme
   resolvedTheme: 'light' | 'dark'
   customColors: CustomThemeColors
+  canChangeTheme: boolean
   setTheme: (theme: Theme) => void
   setCustomColors: (colors: CustomThemeColors) => void
   resetCustomColors: () => void
@@ -45,40 +47,48 @@ function applyThemeClasses(theme: Theme, resolved: 'light' | 'dark', colors: Cus
   clearCustomTheme()
 }
 
+function parseThemeConfigJson(themeConfigJson: string | null): CustomThemeColors {
+  if (!themeConfigJson) {
+    return defaultCustomThemeColors
+  }
+
+  try {
+    return { ...defaultCustomThemeColors, ...JSON.parse(themeConfigJson) } as CustomThemeColors
+  } catch {
+    return defaultCustomThemeColors
+  }
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth()
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme') as Theme | null
-    return stored ?? 'uc'
-  })
-  const [customColors, setCustomColorsState] = useState<CustomThemeColors>(loadCustomThemeColors)
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => resolveTheme(theme))
-  const [hydratedFromApi, setHydratedFromApi] = useState(false)
+  const { isSuperAdmin } = usePermissions()
+  const { addToast } = useToast()
+  const {
+    theme: portalTheme,
+    themeConfigJson,
+    isLoading: brandingLoading,
+    setTheme: savePortalTheme,
+  } = usePortalBranding()
+
+  const [theme, setThemeState] = useState<Theme>(defaultPortalBranding.theme)
+  const [customColors, setCustomColorsState] = useState<CustomThemeColors>(defaultCustomThemeColors)
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
+    resolveTheme(defaultPortalBranding.theme),
+  )
+  const hasHydratedFromPortalRef = useRef(false)
 
   useEffect(() => {
-    if (!isAuthenticated || hydratedFromApi) return
+    if (brandingLoading || hasHydratedFromPortalRef.current) return
 
-    usersApi
-      .getPreferences()
-      .then((preferences) => {
-        if (preferences.theme) {
-          setThemeState(preferences.theme)
-        }
-      })
-      .catch(() => undefined)
-      .finally(() => setHydratedFromApi(true))
-  }, [isAuthenticated, hydratedFromApi])
+    setThemeState(portalTheme)
+    setCustomColorsState(parseThemeConfigJson(themeConfigJson))
+    hasHydratedFromPortalRef.current = true
+  }, [brandingLoading, portalTheme, themeConfigJson])
 
   useEffect(() => {
     const resolved = resolveTheme(theme)
     setResolvedTheme(resolved)
     applyThemeClasses(theme, resolved, customColors)
-    localStorage.setItem('theme', theme)
-
-    if (isAuthenticated && hydratedFromApi) {
-      void usersApi.updatePreferences({ theme }).catch(() => undefined)
-    }
-  }, [theme, customColors, isAuthenticated, hydratedFromApi])
+  }, [theme, customColors])
 
   useEffect(() => {
     if (theme !== 'system') return
@@ -92,30 +102,78 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener('change', handler)
   }, [theme, customColors])
 
-  const setTheme = useCallback((nextTheme: Theme) => setThemeState(nextTheme), [])
+  const persistTheme = useCallback(
+    async (nextTheme: Theme, colors: CustomThemeColors, previousTheme: Theme, previousColors: CustomThemeColors) => {
+      if (!isSuperAdmin) return
 
-  const setCustomColors = useCallback((colors: CustomThemeColors) => {
-    setCustomColorsState(colors)
-    saveCustomThemeColors(colors)
-    setThemeState('custom')
-  }, [])
+      const themeConfigJsonValue =
+        nextTheme === 'custom' ? JSON.stringify(colors) : null
+
+      try {
+        saveCustomThemeColors(colors)
+        await savePortalTheme(nextTheme, themeConfigJsonValue)
+      } catch {
+        setThemeState(previousTheme)
+        setCustomColorsState(previousColors)
+        applyThemeClasses(previousTheme, resolveTheme(previousTheme), previousColors)
+        addToast('error', 'Could not save portal theme.')
+      }
+    },
+    [isSuperAdmin, savePortalTheme, addToast],
+  )
+
+  const setTheme = useCallback(
+    (nextTheme: Theme) => {
+      if (!isSuperAdmin) return
+
+      const previousTheme = theme
+      const previousColors = customColors
+      setThemeState(nextTheme)
+      void persistTheme(nextTheme, customColors, previousTheme, previousColors)
+    },
+    [customColors, isSuperAdmin, persistTheme, theme],
+  )
+
+  const setCustomColors = useCallback(
+    (colors: CustomThemeColors) => {
+      if (!isSuperAdmin) return
+
+      const previousTheme = theme
+      const previousColors = customColors
+      setCustomColorsState(colors)
+      setThemeState('custom')
+      void persistTheme('custom', colors, previousTheme, previousColors)
+    },
+    [customColors, isSuperAdmin, persistTheme, theme],
+  )
 
   const resetCustomColors = useCallback(() => {
-    setCustomColorsState(defaultCustomThemeColors)
-    saveCustomThemeColors(defaultCustomThemeColors)
-    setThemeState('custom')
-  }, [])
+    if (!isSuperAdmin) return
 
-  const toggleTheme = useCallback(
-    () =>
-      setThemeState((prev) => {
-        if (prev === 'uc' || prev === 'custom') return 'dark'
-        if (prev === 'dark') return 'uc'
-        const current = resolveTheme(prev)
-        return current === 'dark' ? 'light' : 'dark'
-      }),
-    [],
-  )
+    const previousTheme = theme
+    const previousColors = customColors
+    setCustomColorsState(defaultCustomThemeColors)
+    setThemeState('custom')
+    void persistTheme('custom', defaultCustomThemeColors, previousTheme, previousColors)
+  }, [customColors, isSuperAdmin, persistTheme, theme])
+
+  const toggleTheme = useCallback(() => {
+    if (!isSuperAdmin) return
+
+    setThemeState((prev) => {
+      const next =
+        prev === 'uc' || prev === 'custom'
+          ? 'dark'
+          : prev === 'dark'
+            ? 'uc'
+            : resolveTheme(prev) === 'dark'
+              ? 'light'
+              : 'dark'
+
+      void persistTheme(next, customColors, prev, customColors)
+      return next
+    })
+  }, [customColors, isSuperAdmin, persistTheme])
 
   return (
     <ThemeContext.Provider
@@ -123,6 +181,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         theme,
         resolvedTheme,
         customColors,
+        canChangeTheme: isSuperAdmin,
         setTheme,
         setCustomColors,
         resetCustomColors,

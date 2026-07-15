@@ -60,7 +60,7 @@ export function LoginForm() {
         <div className="mb-7 flex flex-col items-center text-center">
           <AppBrand
             variant="featured"
-            className="flex-col items-center gap-4"
+            className="w-full max-w-sm flex-col items-center gap-4"
             logoClassName="h-14 sm:h-16"
             titleClassName="text-xl sm:text-2xl font-bold text-center tracking-tight whitespace-normal text-[#003087]"
           />

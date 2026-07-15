@@ -1,12 +1,11 @@
 import { apiRequest, clearTokens, getRefreshToken } from '@/lib/api'
 import { identityApi } from '@/services/identity'
-import type { Student, Theme, User } from '@/types'
+import type { Student, User } from '@/types'
 
 export interface AuthMeResponse {
   user: User
   student: Student | null
   preferences: {
-    theme: Theme
     selectedPeriodId: string | null
   }
 }

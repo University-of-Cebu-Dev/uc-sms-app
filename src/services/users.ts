@@ -1,8 +1,6 @@
 import { apiRequest } from '@/lib/api'
-import type { Theme } from '@/types'
 
 export interface UserPreferences {
-  theme: Theme
   selectedPeriodId: string | null
 }
 

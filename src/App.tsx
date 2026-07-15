@@ -11,14 +11,14 @@ export default function App() {
   return (
     <AuthProvider>
       <PortalBrandingProvider>
-        <ThemeProvider>
-          <ToastProvider>
-            <RoleSwitcherProvider>
+        <ToastProvider>
+          <RoleSwitcherProvider>
+            <ThemeProvider>
               <RouterProvider router={router} />
               <ToastContainer />
-            </RoleSwitcherProvider>
-          </ToastProvider>
-        </ThemeProvider>
+            </ThemeProvider>
+          </RoleSwitcherProvider>
+        </ToastProvider>
       </PortalBrandingProvider>
     </AuthProvider>
   )

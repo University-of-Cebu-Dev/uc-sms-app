@@ -31,11 +31,17 @@ export function AppBrand({
         className={cn('h-8 w-auto shrink-0 object-contain', logoClassName)}
       />
       {showTitle && (
-        <div className={cn('min-w-0', isFeatured && 'text-center')}>
+        <div
+          className={cn(
+            'min-w-0',
+            isFeatured && 'flex w-full max-w-sm flex-col items-center text-center',
+          )}
+        >
           <span
             className={cn(
               'block font-brand font-semibold text-gh-fg text-sm leading-tight',
               !isFeatured && 'truncate',
+              isFeatured && 'w-full',
               titleClassName,
             )}
           >
@@ -45,9 +51,8 @@ export function AppBrand({
             isFeatured ? (
               <span
                 className={cn(
-                  'mt-2 inline-flex max-w-full items-center justify-center rounded-lg',
-                  'bg-[#00a8e8]/12 px-3 py-1.5 text-sm sm:text-base font-semibold leading-snug',
-                  'text-[#003087] ring-1 ring-[#00a8e8]/30 whitespace-normal',
+                  'mt-1 block w-full text-sm sm:text-base',
+                  'font-semibold leading-snug text-[#003087] whitespace-normal',
                   campusClassName,
                 )}
               >

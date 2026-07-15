@@ -3,13 +3,28 @@ import {
   PORTAL_BRANDING_STORAGE_KEY,
   type PortalBranding,
 } from '@/data/portalBrandingDefaults'
+import type { Theme } from '@/types'
 
-function migrateLegacyBranding(parsed: Partial<PortalBranding> & { campusName?: string }) {
+const validThemes = new Set<Theme>(['light', 'dark', 'system', 'uc', 'custom'])
+
+function normalizeTheme(theme?: string | null): Theme {
+  if (theme && validThemes.has(theme as Theme)) {
+    return theme as Theme
+  }
+
+  return defaultPortalBranding.theme
+}
+
+function migrateLegacyBranding(
+  parsed: Partial<PortalBranding> & { campusName?: string; theme?: string },
+) {
   if (parsed.schoolName?.trim()) {
     return {
       schoolName: parsed.schoolName.trim(),
       campusName: parsed.campusName?.trim() ?? '',
       logoUrl: parsed.logoUrl || defaultPortalBranding.logoUrl,
+      theme: normalizeTheme(parsed.theme),
+      themeConfigJson: parsed.themeConfigJson ?? null,
     }
   }
 
@@ -19,6 +34,8 @@ function migrateLegacyBranding(parsed: Partial<PortalBranding> & { campusName?: 
       schoolName: defaultPortalBranding.schoolName,
       campusName: legacyName,
       logoUrl: parsed.logoUrl || defaultPortalBranding.logoUrl,
+      theme: normalizeTheme(parsed.theme),
+      themeConfigJson: parsed.themeConfigJson ?? null,
     }
   }
 
@@ -26,7 +43,29 @@ function migrateLegacyBranding(parsed: Partial<PortalBranding> & { campusName?: 
     schoolName: legacyName || defaultPortalBranding.schoolName,
     campusName: '',
     logoUrl: parsed.logoUrl || defaultPortalBranding.logoUrl,
+    theme: normalizeTheme(parsed.theme),
+    themeConfigJson: parsed.themeConfigJson ?? null,
   }
+}
+
+export function normalizePortalBranding(branding: Partial<PortalBranding>): PortalBranding {
+  const schoolName = branding.schoolName?.trim() || defaultPortalBranding.schoolName
+  const campusName = branding.campusName?.trim() ?? ''
+  const logoUrl = branding.logoUrl?.trim()
+    ? branding.logoUrl.trim()
+    : defaultPortalBranding.logoUrl
+
+  return {
+    schoolName,
+    campusName,
+    logoUrl,
+    theme: normalizeTheme(branding.theme),
+    themeConfigJson: branding.themeConfigJson ?? null,
+  }
+}
+
+export function toApiLogoUrl(logoUrl: string) {
+  return logoUrl === defaultPortalBranding.logoUrl ? '' : logoUrl
 }
 
 export function loadPortalBranding(): PortalBranding {
@@ -35,14 +74,18 @@ export function loadPortalBranding(): PortalBranding {
     if (!stored) return defaultPortalBranding
 
     const parsed = JSON.parse(stored) as Partial<PortalBranding>
-    return migrateLegacyBranding(parsed)
+    return normalizePortalBranding(migrateLegacyBranding(parsed))
   } catch {
     return defaultPortalBranding
   }
 }
 
 export function savePortalBranding(branding: PortalBranding) {
-  localStorage.setItem(PORTAL_BRANDING_STORAGE_KEY, JSON.stringify(branding))
+  try {
+    localStorage.setItem(PORTAL_BRANDING_STORAGE_KEY, JSON.stringify(branding))
+  } catch {
+    // Logo data URLs can exceed localStorage quota; keep in-memory state working.
+  }
 }
 
 export function clearPortalBranding() {

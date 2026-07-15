@@ -70,7 +70,7 @@ const themeOptions: {
 ]
 
 export function ThemesSettings() {
-  const { theme, customColors, setTheme } = useTheme()
+  const { theme, customColors, setTheme, canChangeTheme } = useTheme()
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -81,7 +81,9 @@ export function ThemesSettings() {
             <h3 className="text-base font-semibold text-gh-fg">Appearance</h3>
           </div>
           <p className="mt-1 text-sm text-gh-fg-muted">
-            Choose a preset or build your own theme.
+            {canChangeTheme
+              ? 'Choose a preset or build your own theme for the entire portal.'
+              : 'Portal theme is managed by SuperAdmin and applies to all users.'}
           </p>
         </div>
 
@@ -100,10 +102,12 @@ export function ThemesSettings() {
                   type="button"
                   role="radio"
                   aria-checked={isSelected}
+                  disabled={!canChangeTheme}
                   onClick={() => setTheme(value)}
                   className={cn(
                     'relative flex flex-col rounded-xl border p-4 text-left transition-all duration-200',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gh-accent',
+                    !canChangeTheme && 'cursor-default opacity-80',
                     isSelected
                       ? 'border-gh-accent bg-gh-accent/5 ring-2 ring-gh-accent/20 shadow-md shadow-gh-accent/10'
                       : 'border-gh-border bg-gh-canvas hover:border-gh-accent/30 hover:shadow-sm',
@@ -159,7 +163,7 @@ export function ThemesSettings() {
         </div>
       </Card>
 
-      <CustomizeThemePanel />
+      {canChangeTheme ? <CustomizeThemePanel /> : null}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import ucLoginBg from '@/assets/uc-login-bg.jpg'
 
 export function AuthLayout() {
   const { schoolName } = usePortalBranding()
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden">
       <div

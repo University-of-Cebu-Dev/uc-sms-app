@@ -32,7 +32,7 @@ export function GeneralSettings() {
     setDraftCampusName(campusName)
   }, [campusName])
 
-  const handleSchoolNameBlur = () => {
+  const handleSchoolNameBlur = async () => {
     const trimmed = draftSchoolName.trim()
     if (!trimmed) {
       setDraftSchoolName(schoolName)
@@ -40,16 +40,26 @@ export function GeneralSettings() {
     }
 
     if (trimmed !== schoolName) {
-      setSchoolName(trimmed)
-      addToast('success', 'School name updated')
+      try {
+        await setSchoolName(trimmed)
+        addToast('success', 'School name updated')
+      } catch {
+        setDraftSchoolName(schoolName)
+        addToast('error', 'Could not save school name')
+      }
     }
   }
 
-  const handleCampusNameBlur = () => {
+  const handleCampusNameBlur = async () => {
     const trimmed = draftCampusName.trim()
     if (trimmed !== campusName) {
-      setCampusName(trimmed)
-      addToast('success', 'Campus name updated')
+      try {
+        await setCampusName(trimmed)
+        addToast('success', 'Campus name updated')
+      } catch {
+        setDraftCampusName(campusName)
+        addToast('error', 'Could not save campus name')
+      }
     }
   }
 
@@ -61,18 +71,28 @@ export function GeneralSettings() {
 
     try {
       const dataUrl = await readLogoFile(file)
-      setLogoUrl(dataUrl)
+      await setLogoUrl(dataUrl)
       addToast('success', 'Logo updated')
     } catch (error) {
-      addToast('error', 'Logo upload failed', error instanceof Error ? error.message : undefined)
+      addToast(
+        'error',
+        error instanceof Error && error.message.includes('Could not save')
+          ? 'Could not save logo'
+          : 'Logo upload failed',
+        error instanceof Error ? error.message : undefined,
+      )
     }
   }
 
-  const handleReset = () => {
-    resetBranding()
-    setDraftSchoolName(defaultPortalBranding.schoolName)
-    setDraftCampusName(defaultPortalBranding.campusName)
-    addToast('success', 'Branding reset', 'Restored default school name, campus name, and logo.')
+  const handleReset = async () => {
+    try {
+      await resetBranding()
+      setDraftSchoolName(defaultPortalBranding.schoolName)
+      setDraftCampusName(defaultPortalBranding.campusName)
+      addToast('success', 'Branding reset', 'Restored default school name, campus name, and logo.')
+    } catch {
+      addToast('error', 'Could not reset branding')
+    }
   }
 
   return (
@@ -124,7 +144,7 @@ export function GeneralSettings() {
               }
             }}
             placeholder="e.g. Banilad Campus"
-            hint="Optional. Shown below the school name in the sidebar and login screen."
+            hint="Optional. Shown below the school name in the sidebar and login screen. Saved to the portal API."
           />
 
           <div className="space-y-3">
@@ -166,7 +186,7 @@ export function GeneralSettings() {
           </div>
 
           <div className="flex justify-end border-t border-gh-border pt-4">
-            <Button type="button" variant="outline" size="sm" onClick={handleReset}>
+            <Button type="button" variant="outline" size="sm" onClick={() => void handleReset()}>
               <RotateCcw className="h-4 w-4" />
               Reset to defaults
             </Button>
