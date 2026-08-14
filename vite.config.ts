@@ -12,13 +12,20 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      // UCSMS.API's own native "https" launch profile.
       '/api': {
-        target: 'http://localhost:5286',
+        // https, not http: app.UseHttpsRedirection() 307s every HTTP request to its
+        // HTTPS port, which took the browser's fetch() straight out of this
+        // same-origin proxy to a different origin. Targeting the HTTPS port
+        // directly avoids that redirect entirely.
+        target: 'https://localhost:7164',
         changeOrigin: true,
+        secure: false, // dev cert is self-signed; Node's proxy client doesn't trust it
       },
       '/identity-api': {
-        target: 'http://localhost:5135/api',
+        target: 'https://localhost:7032/api',
         changeOrigin: true,
+        secure: false, // dev cert is self-signed; Node's proxy client doesn't trust it
         rewrite: (path) => path.replace(/^\/identity-api/, ''),
       },
     },
