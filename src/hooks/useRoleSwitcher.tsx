@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/useToast'
 import { getAccessToken } from '@/lib/api'
 import {
   getIdentityRoleMeta,
-  isAdminRole,
   isSuperAdminRole,
   normalizeIdentityRole,
   type IdentityRoleMeta,
@@ -34,7 +33,6 @@ interface RoleSwitcherContextValue {
   canSwitchRoles: boolean
   activeRolePermissions: Set<string>
   isActiveRoleSuperAdmin: boolean
-  isActiveRoleAdmin: boolean
   getPermissionsForRole: (role: string) => Set<string>
   setActiveRole: (role: string) => void
 }
@@ -88,13 +86,7 @@ function toPermissionSet(permissions: string[]) {
 }
 
 async function loadRolePermissions(roleId: string) {
-  if (isSuperAdminRole(roleId) || isAdminRole(roleId)) {
-    // Admin's own permission row can never be edited via RolePermissionsManager
-    // (the backend blocks touching SuperAdmin's/Admin's own permissions), so
-    // there's no other source of truth to fetch from -- give it the same
-    // synthesized full-module set as SuperAdmin. This matches what Admin is
-    // actually authorized to reach; the two hard-gated settings pages (Themes,
-    // and Admin promotion itself) are enforced separately, not via this set.
+  if (isSuperAdminRole(roleId)) {
     return getSuperAdminPermissions()
   }
 
@@ -166,7 +158,7 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
     (role: string) => {
       const normalized = normalizeIdentityRole(role)
 
-      if (isSuperAdminRole(normalized) || isAdminRole(normalized)) {
+      if (isSuperAdminRole(normalized)) {
         return getSuperAdminPermissions()
       }
 
@@ -181,7 +173,6 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
   )
 
   const isActiveRoleSuperAdmin = isSuperAdminRole(activeRole)
-  const isActiveRoleAdmin = isAdminRole(activeRole)
 
   const setActiveRole = useCallback(
     (role: string) => {
@@ -207,7 +198,6 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
       canSwitchRoles,
       activeRolePermissions,
       isActiveRoleSuperAdmin,
-      isActiveRoleAdmin,
       getPermissionsForRole,
       setActiveRole,
     }),
@@ -217,7 +207,6 @@ export function RoleSwitcherProvider({ children }: { children: ReactNode }) {
       canSwitchRoles,
       activeRolePermissions,
       isActiveRoleSuperAdmin,
-      isActiveRoleAdmin,
       getPermissionsForRole,
       setActiveRole,
     ],

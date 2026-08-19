@@ -26,8 +26,9 @@ const tabs = [
     label: 'Themes',
     path: '/settings/themes',
     icon: Palette,
-    // SuperAdmin only -- matches PortalRoleAuthorization.IsSuperAdmin on the backend.
-    visibleFor: 'superadmin',
+    // SuperAdmin or UCSMS.Admin -- matches PortalRoleAuthorization.CanManageTheme
+    // on the backend.
+    superAdminOrUcsmsAdminOnly: true,
   },
   {
     label: 'Roles & Permissions',
@@ -39,18 +40,18 @@ const tabs = [
     label: 'Accounts',
     path: '/settings/accounts',
     icon: Users,
-    // SuperAdmin or Admin -- matches UserController's
-    // [Authorize(Roles = "SuperAdmin,Admin")] on the backend.
-    visibleFor: 'superadmin-or-admin',
+    // SuperAdmin or UCSMS.Admin -- matches UserController's
+    // [Authorize(Roles = "SuperAdmin,Admin,UCSMS.Admin")] on the backend.
+    superAdminOrUcsmsAdminOnly: true,
   },
 ] as const
 
 export function SettingsTabs() {
-  const { hasPermission, isSuperAdmin, isAdmin } = usePermissions()
+  const { hasPermission, isSuperAdmin, isUcsmsAdmin } = usePermissions()
 
   const visibleTabs = tabs.filter((tab) => {
-    if ('visibleFor' in tab) {
-      return tab.visibleFor === 'superadmin' ? isSuperAdmin : isSuperAdmin || isAdmin
+    if ('superAdminOrUcsmsAdminOnly' in tab) {
+      return isSuperAdmin || isUcsmsAdmin
     }
 
     return hasPermission(tab.permission)

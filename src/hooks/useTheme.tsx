@@ -60,7 +60,8 @@ function parseThemeConfigJson(themeConfigJson: string | null): CustomThemeColors
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { isSuperAdmin } = usePermissions()
+  const { isSuperAdmin, isUcsmsAdmin } = usePermissions()
+  const canManageTheme = isSuperAdmin || isUcsmsAdmin
   const { addToast } = useToast()
   const {
     theme: portalTheme,
@@ -104,7 +105,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const persistTheme = useCallback(
     async (nextTheme: Theme, colors: CustomThemeColors, previousTheme: Theme, previousColors: CustomThemeColors) => {
-      if (!isSuperAdmin) return
+      if (!canManageTheme) return
 
       const themeConfigJsonValue =
         nextTheme === 'custom' ? JSON.stringify(colors) : null
@@ -119,24 +120,24 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         addToast('error', 'Could not save portal theme.')
       }
     },
-    [isSuperAdmin, savePortalTheme, addToast],
+    [canManageTheme, savePortalTheme, addToast],
   )
 
   const setTheme = useCallback(
     (nextTheme: Theme) => {
-      if (!isSuperAdmin) return
+      if (!canManageTheme) return
 
       const previousTheme = theme
       const previousColors = customColors
       setThemeState(nextTheme)
       void persistTheme(nextTheme, customColors, previousTheme, previousColors)
     },
-    [customColors, isSuperAdmin, persistTheme, theme],
+    [customColors, canManageTheme, persistTheme, theme],
   )
 
   const setCustomColors = useCallback(
     (colors: CustomThemeColors) => {
-      if (!isSuperAdmin) return
+      if (!canManageTheme) return
 
       const previousTheme = theme
       const previousColors = customColors
@@ -144,21 +145,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setThemeState('custom')
       void persistTheme('custom', colors, previousTheme, previousColors)
     },
-    [customColors, isSuperAdmin, persistTheme, theme],
+    [customColors, canManageTheme, persistTheme, theme],
   )
 
   const resetCustomColors = useCallback(() => {
-    if (!isSuperAdmin) return
+    if (!canManageTheme) return
 
     const previousTheme = theme
     const previousColors = customColors
     setCustomColorsState(defaultCustomThemeColors)
     setThemeState('custom')
     void persistTheme('custom', defaultCustomThemeColors, previousTheme, previousColors)
-  }, [customColors, isSuperAdmin, persistTheme, theme])
+  }, [customColors, canManageTheme, persistTheme, theme])
 
   const toggleTheme = useCallback(() => {
-    if (!isSuperAdmin) return
+    if (!canManageTheme) return
 
     setThemeState((prev) => {
       const next =
@@ -173,7 +174,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       void persistTheme(next, customColors, prev, customColors)
       return next
     })
-  }, [customColors, isSuperAdmin, persistTheme])
+  }, [customColors, canManageTheme, persistTheme])
 
   return (
     <ThemeContext.Provider
@@ -181,7 +182,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         theme,
         resolvedTheme,
         customColors,
-        canChangeTheme: isSuperAdmin,
+        canChangeTheme: canManageTheme,
         setTheme,
         setCustomColors,
         resetCustomColors,
