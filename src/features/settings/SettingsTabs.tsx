@@ -26,7 +26,8 @@ const tabs = [
     label: 'Themes',
     path: '/settings/themes',
     icon: Palette,
-    superAdminOnly: true,
+    // SuperAdmin only -- matches PortalRoleAuthorization.IsSuperAdmin on the backend.
+    visibleFor: 'superadmin',
   },
   {
     label: 'Roles & Permissions',
@@ -38,16 +39,18 @@ const tabs = [
     label: 'Accounts',
     path: '/settings/accounts',
     icon: Users,
-    superAdminOnly: true,
+    // SuperAdmin or Admin -- matches UserController's
+    // [Authorize(Roles = "SuperAdmin,Admin")] on the backend.
+    visibleFor: 'superadmin-or-admin',
   },
 ] as const
 
 export function SettingsTabs() {
-  const { hasPermission, isSuperAdmin } = usePermissions()
+  const { hasPermission, isSuperAdmin, isAdmin } = usePermissions()
 
   const visibleTabs = tabs.filter((tab) => {
-    if ('superAdminOnly' in tab) {
-      return isSuperAdmin
+    if ('visibleFor' in tab) {
+      return tab.visibleFor === 'superadmin' ? isSuperAdmin : isSuperAdmin || isAdmin
     }
 
     return hasPermission(tab.permission)
