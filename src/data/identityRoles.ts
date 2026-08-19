@@ -241,14 +241,14 @@ export const identityRoleCatalog: IdentityRoleMeta[] = [
     enrollmentPath: '/enrollment/staff',
   },
   {
-    // Backend identifier is "Admin" (UCIdentityService's SystemRoles.Admin), but
-    // displayed as "SMSAdmin" here since "Admin" already means administrative
-    // staff (a person type) elsewhere in this app's UI -- see memory
-    // ucsmsfrontend_admin_naming for why. Not in staffAssignableRoleIds: this
-    // role can only be granted via the dedicated promote/demote action.
-    id: 'ADMIN',
-    label: 'SMSAdmin',
-    description: 'Elevated SMS administrative access, one tier below SuperAdmin.',
+    // A normal, permission-driven role (not an elevated system role like
+    // SuperAdmin/Admin) -- its access comes entirely from whatever UCSMS.*
+    // permissions are assigned to it in UCIdentityService's normal
+    // role-permission system, fetched the same way as any other role.
+    // Assignable via the standard staff account role picker.
+    id: 'UCSMS.ADMIN',
+    label: 'UCSMS.Admin',
+    description: 'Full access across all UCSMS modules.',
     icon: ShieldCheck,
     accent: 'text-red-700 dark:text-red-400',
     accentBg: 'bg-red-500/10',
@@ -279,13 +279,9 @@ export function normalizeIdentityRole(role?: string | null): string {
   return role.trim().toUpperCase().replace(/\s+/g, '_').replace('/', '_')
 }
 
-// ADMIN excluded: it's an elevated system role grantable only via the dedicated
-// promote/demote action (see AccountManager.tsx), not the normal role picker --
-// the backend rejects it in this array from anyone but SuperAdmin, and even for
-// SuperAdmin it isn't the intended path.
 export const staffAssignableRoleIds = identityRoleCatalog
   .map((role) => role.id)
-  .filter((id) => id !== 'STUDENT' && id !== 'GUARDIAN' && id !== 'ADMIN')
+  .filter((id) => id !== 'STUDENT' && id !== 'GUARDIAN')
 
 export const STAFF_ENROLLMENT_PATH = '/enrollment/staff'
 
@@ -297,8 +293,6 @@ export function isSuperAdminRole(role?: string | null) {
   return normalizeIdentityRole(role).toLowerCase() === 'superadmin'
 }
 
-// Compares against the backend's actual role name ("Admin"/SystemRoles.Admin) --
-// unrelated to the "SMSAdmin" display label used in the catalog entry above.
-export function isAdminRole(role?: string | null) {
-  return normalizeIdentityRole(role).toLowerCase() === 'admin'
+export function isUcsmsAdminRole(role?: string | null) {
+  return normalizeIdentityRole(role) === 'UCSMS.ADMIN'
 }

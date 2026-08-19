@@ -17,22 +17,18 @@ export function canAccessPath(
   pathname: string,
   permissions: ReadonlySet<string>,
   isSuperAdmin: boolean,
-  isAdmin = false,
+  isUcsmsAdmin = false,
 ) {
   if (isSuperAdmin) return true
 
   // Neither path is a portalModules entry, so without this explicit block
   // getModuleForPath() would find no module and fall through to "allow" below --
-  // these two stay hard-gated by role rather than by the permission catalog.
-  // Themes: SuperAdmin only, matches PortalRoleAuthorization.IsSuperAdmin on the
-  // backend. Accounts: SuperAdmin or Admin, matches UserController's
-  // [Authorize(Roles = "SuperAdmin,Admin")].
-  if (pathname.startsWith('/settings/themes')) {
-    return false
-  }
-
-  if (pathname.startsWith('/settings/accounts')) {
-    return isAdmin
+  // both stay hard-gated by role rather than by the permission catalog. Matches
+  // PortalRoleAuthorization.CanManageTheme (UCSms) and the widened
+  // [Authorize(Roles = "SuperAdmin,Admin,UCSMS.Admin")] on the relevant
+  // UserController endpoints (UCIdentityService).
+  if (pathname.startsWith('/settings/themes') || pathname.startsWith('/settings/accounts')) {
+    return isUcsmsAdmin
   }
 
   if (ALWAYS_ALLOWED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {

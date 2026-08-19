@@ -83,7 +83,7 @@ export function ThemesSettings() {
           <p className="mt-1 text-sm text-gh-fg-muted">
             {canChangeTheme
               ? 'Choose a preset or build your own theme for the entire portal.'
-              : 'Portal theme is managed by SuperAdmin and applies to all users.'}
+              : 'Portal theme is managed by an administrator and applies to all users.'}
           </p>
         </div>
 
