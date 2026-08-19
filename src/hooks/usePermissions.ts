@@ -5,7 +5,8 @@ import { canAccessPath, getAccessibleModules } from '@/utils/moduleAccess'
 
 export function usePermissions() {
   const { isAuthenticated } = useAuth()
-  const { activeRole, activeRolePermissions, isActiveRoleSuperAdmin } = useRoleSwitcher()
+  const { activeRole, activeRolePermissions, isActiveRoleSuperAdmin, isActiveRoleAdmin } =
+    useRoleSwitcher()
 
   return useMemo(() => {
     const permissions = activeRolePermissions
@@ -14,11 +15,13 @@ export function usePermissions() {
       roles: [activeRole],
       permissions,
       isSuperAdmin: isActiveRoleSuperAdmin,
+      isAdmin: isActiveRoleAdmin,
       accessibleModules: getAccessibleModules(permissions, isActiveRoleSuperAdmin),
       canAccessPath: (pathname: string) =>
-        isAuthenticated && canAccessPath(pathname, permissions, isActiveRoleSuperAdmin),
+        isAuthenticated &&
+        canAccessPath(pathname, permissions, isActiveRoleSuperAdmin, isActiveRoleAdmin),
       hasPermission: (permission: string) =>
         isActiveRoleSuperAdmin || permissions.has(permission),
     }
-  }, [isAuthenticated, activeRole, activeRolePermissions, isActiveRoleSuperAdmin])
+  }, [isAuthenticated, activeRole, activeRolePermissions, isActiveRoleSuperAdmin, isActiveRoleAdmin])
 }

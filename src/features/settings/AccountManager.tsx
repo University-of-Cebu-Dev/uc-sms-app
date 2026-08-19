@@ -4,6 +4,8 @@ import {
   Plus,
   RefreshCw,
   Search,
+  ShieldCheck,
+  ShieldOff,
   UserCog,
   Users,
 } from 'lucide-react'
@@ -14,7 +16,13 @@ import {
   type IdentityUserAccount,
   type UpdateAccountPayload,
 } from '@/services/identityUsers'
-import { getIdentityRoleMeta, staffAssignableRoleIds } from '@/data/identityRoles'
+import {
+  getIdentityRoleMeta,
+  isAdminRole,
+  isSuperAdminRole,
+  staffAssignableRoleIds,
+} from '@/data/identityRoles'
+import { usePermissions } from '@/hooks/usePermissions'
 import { useToast } from '@/hooks/useToast'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -100,9 +108,11 @@ function toDateInputValue(value: string | null) {
 
 export function AccountManager() {
   const { addToast } = useToast()
+  const { isSuperAdmin } = usePermissions()
   const [accounts, setAccounts] = useState<IdentityUserAccount[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [togglingAdminId, setTogglingAdminId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [loadError, setLoadError] = useState<string | null>(null)
   const [formMode, setFormMode] = useState<AccountFormMode>('edit')
@@ -266,6 +276,26 @@ export function AccountManager() {
     }
   }
 
+  const handleToggleAdmin = async (account: IdentityUserAccount) => {
+    const isCurrentlyAdmin = account.roles.some(isAdminRole)
+    setTogglingAdminId(account.id)
+    try {
+      if (isCurrentlyAdmin) {
+        await identityUsersApi.demoteFromAdmin(account.id)
+        addToast('success', 'Demoted from SMSAdmin', `${formatAccountName(account)} is no longer an SMSAdmin.`)
+      } else {
+        await identityUsersApi.promoteToAdmin(account.id)
+        addToast('success', 'Promoted to SMSAdmin', `${formatAccountName(account)} is now an SMSAdmin.`)
+      }
+      await loadAccounts()
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : 'Could not update SMSAdmin status.'
+      addToast('error', 'Update failed', message)
+    } finally {
+      setTogglingAdminId(null)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-64 items-center justify-center">
@@ -379,10 +409,32 @@ export function AccountManager() {
                   {account.dateResigned ? formatDate(account.dateResigned) : '—'}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => openEditModal(account)}>
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </Button>
+                  <div className="flex justify-end gap-1">
+                    {isSuperAdmin && !account.roles.some(isSuperAdminRole) ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => void handleToggleAdmin(account)}
+                        loading={togglingAdminId === account.id}
+                      >
+                        {account.roles.some(isAdminRole) ? (
+                          <>
+                            <ShieldOff className="h-4 w-4" />
+                            Demote
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck className="h-4 w-4" />
+                            Promote
+                          </>
+                        )}
+                      </Button>
+                    ) : null}
+                    <Button variant="ghost" size="sm" onClick={() => openEditModal(account)}>
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

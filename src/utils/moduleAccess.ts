@@ -17,11 +17,22 @@ export function canAccessPath(
   pathname: string,
   permissions: ReadonlySet<string>,
   isSuperAdmin: boolean,
+  isAdmin = false,
 ) {
   if (isSuperAdmin) return true
 
-  if (pathname.startsWith('/settings/accounts') || pathname.startsWith('/settings/themes')) {
+  // Neither path is a portalModules entry, so without this explicit block
+  // getModuleForPath() would find no module and fall through to "allow" below --
+  // these two stay hard-gated by role rather than by the permission catalog.
+  // Themes: SuperAdmin only, matches PortalRoleAuthorization.IsSuperAdmin on the
+  // backend. Accounts: SuperAdmin or Admin, matches UserController's
+  // [Authorize(Roles = "SuperAdmin,Admin")].
+  if (pathname.startsWith('/settings/themes')) {
     return false
+  }
+
+  if (pathname.startsWith('/settings/accounts')) {
+    return isAdmin
   }
 
   if (ALWAYS_ALLOWED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
