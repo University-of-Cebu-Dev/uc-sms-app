@@ -49,3 +49,15 @@ export function getPermissionsFromToken(token: string | null) {
 
   return extractClaimValues(payload, 'permission', 'permissions')
 }
+
+// UCIdentityService is shared across every ecosystem app -- a successful login only
+// proves the credentials are valid, not that the account has any business in this
+// app specifically. See UCIdentityService/docs/APP_ENROLLMENT_GUIDE.md's "Reject
+// logins from accounts with no access to your app" section.
+export function hasAccessToThisApp(token: string, appPrefix = 'UCSMS'): boolean {
+  const roles = getRolesFromToken(token).map((role) => role.toUpperCase())
+  if (roles.includes('SUPERADMIN') || roles.includes('ADMIN')) return true
+
+  const permissions = getPermissionsFromToken(token)
+  return permissions.some((permission) => permission.startsWith(`${appPrefix}.`))
+}

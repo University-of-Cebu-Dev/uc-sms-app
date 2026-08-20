@@ -52,6 +52,11 @@ const LOGIN_ERROR_MAP: Record<string, LoginErrorDetails> = {
     message: 'You signed in, but we could not load your portal profile.',
     hint: 'Try again. If the problem continues, contact support.',
   },
+  NO_APP_ACCESS: {
+    title: 'No access to this portal',
+    message: 'Your account has no access to the University of Cebu SMS portal.',
+    hint: 'Contact your administrator if you believe this is wrong.',
+  },
 }
 
 function normalizeLoginCode(raw: string): string {
@@ -141,4 +146,8 @@ export function getLoginErrorDetails(error: unknown): LoginErrorDetails {
 
 export function getProfileLoadError(): LoginErrorDetails {
   return LOGIN_ERROR_MAP.PROFILE_LOAD_FAILED
+}
+
+export function getNoAppAccessError(): LoginErrorDetails {
+  return LOGIN_ERROR_MAP.NO_APP_ACCESS
 }
