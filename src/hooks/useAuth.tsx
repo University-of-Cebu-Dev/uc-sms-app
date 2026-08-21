@@ -9,7 +9,8 @@ import {
 } from 'react'
 import { authApi } from '@/services/auth'
 import { setTokens, getAccessToken, clearTokens } from '@/lib/api'
-import { getProfileLoadError, LoginError } from '@/utils/loginErrors'
+import { getNoAppAccessError, getProfileLoadError, LoginError } from '@/utils/loginErrors'
+import { hasAccessToThisApp } from '@/utils/jwt'
 import type { Student, User } from '@/types'
 
 interface AuthContextValue {
@@ -60,6 +61,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       rememberMe,
     )
+
+    if (!hasAccessToThisApp(accessToken)) {
+      throw new LoginError(getNoAppAccessError())
+    }
 
     setTokens(accessToken, refreshToken, persist)
 
