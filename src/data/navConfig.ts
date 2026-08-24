@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
+  Contact,
   GraduationCap,
   LayoutDashboard,
   ListChecks,
@@ -25,7 +26,7 @@ export interface ModuleNavItem extends MainNavItem {
   description: string
 }
 
-export const mainNavPrefixPaths = ['/enrollment', '/settings']
+export const mainNavPrefixPaths = ['/enrollment', '/records', '/settings']
 
 export const moduleNavItems: ModuleNavItem[] = [
   {
@@ -81,6 +82,7 @@ export const moduleNavItems: ModuleNavItem[] = [
 export const mainNavItems: MainNavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Enrollment', path: '/enrollment', icon: UserPlus },
+  { label: 'Records', path: '/records', icon: Contact },
   ...moduleNavItems,
   { label: 'Settings', path: '/settings', icon: Settings },
 ]

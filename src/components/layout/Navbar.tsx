@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { MainNav } from '@/components/layout/MainNav'
 import { SettingsTabs } from '@/features/settings/SettingsTabs'
 import { EnrollmentTabs } from '@/features/enrollment/EnrollmentTabs'
+import { RecordsTabs } from '@/features/records/RecordsTabs'
 
 export const Navbar = () => {
   const { toggle } = useSidebar()
@@ -13,6 +14,7 @@ export const Navbar = () => {
   const { unreadCount } = useNotifications()
   const isSettings = pathname.startsWith('/settings')
   const isEnrollment = pathname.startsWith('/enrollment')
+  const isRecords = pathname.startsWith('/records')
 
   return (
     <header className="sticky top-0 z-30 border-b border-gh-border bg-gh-canvas">
@@ -52,6 +54,7 @@ export const Navbar = () => {
 
       {isSettings && <SettingsTabs />}
       {isEnrollment && <EnrollmentTabs />}
+      {isRecords && <RecordsTabs />}
     </header>
   )
 }
