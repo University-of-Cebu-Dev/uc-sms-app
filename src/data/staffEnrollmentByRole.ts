@@ -314,5 +314,7 @@ export function getAllStaffSectionLabelsByPath() {
 }
 
 export function isStaffSectionAllowedForRole(pathname: string, roleId: string) {
-  return getStaffSidebarSections(roleId).some((section) => section.path === pathname)
+  return getStaffSidebarSections(roleId).some(
+    (section) => pathname === section.path || pathname.startsWith(`${section.path}/`),
+  )
 }

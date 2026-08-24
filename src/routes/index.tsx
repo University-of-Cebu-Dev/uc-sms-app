@@ -18,6 +18,11 @@ import { StaffEnrolledSubjects } from '@/features/enrollment/staff/StaffEnrolled
 import { StaffPromissory } from '@/features/enrollment/staff/StaffPromissory'
 import { StaffAdjustments } from '@/features/enrollment/staff/StaffAdjustments'
 import { StaffTracker } from '@/features/enrollment/staff/StaffTracker'
+import { RecordsPage } from '@/pages/RecordsPage'
+import { RecordsStudentList } from '@/features/records/RecordsStudentList'
+import { RecordsParentList } from '@/features/records/RecordsParentList'
+import { RecordsSettings } from '@/features/records/RecordsSettings'
+import { RecordsDetail } from '@/features/records/RecordsDetail'
 import { EnrollmentSettings } from '@/features/settings/EnrollmentSettings'
 import { GeneralSettings } from '@/features/settings/GeneralSettings'
 import { ProgramsSettings } from '@/features/settings/ProgramsSettings'
@@ -95,6 +100,25 @@ export const router = createBrowserRouter([
               { path: 'tracker', element: <StaffTracker /> },
             ],
           },
+        ],
+      },
+      {
+        path: '/records',
+        element: (
+          <ModuleProtectedRoute path="/records">
+            <RecordsPage />
+          </ModuleProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to="/records/student" replace /> },
+          { path: 'student', element: <RecordsStudentList /> },
+          { path: 'parent', element: <RecordsParentList /> },
+          { path: 'settings', element: (
+            <ModuleProtectedRoute path="/records/settings">
+              <RecordsSettings />
+            </ModuleProtectedRoute>
+          ) },
+          { path: ':id', element: <RecordsDetail /> },
         ],
       },
       ...moduleRoutes,
