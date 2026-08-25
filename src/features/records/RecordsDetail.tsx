@@ -419,7 +419,15 @@ export function RecordsDetail() {
     gpa: '',
     lrnNumber: '',
   })
+  const [schoolQuery, setSchoolQuery] = useState('')
+  const [isSchoolSuggestionsOpen, setIsSchoolSuggestionsOpen] = useState(false)
   const [isSavingEducation, setIsSavingEducation] = useState(false)
+
+  const schoolSuggestions = useMemo(() => {
+    const query = schoolQuery.trim().toLowerCase()
+    if (!query) return []
+    return schools.filter((s) => (s.name ?? '').toLowerCase().includes(query)).slice(0, 8)
+  }, [schoolQuery, schools])
 
   const openEducationModal = (history: EducationHistory | null) => {
     setEducationForm(
@@ -433,20 +441,49 @@ export function RecordsDetail() {
             gpa: history.gpa ?? '',
             lrnNumber: history.lrnNumber ?? '',
           }
-        : { schoolId: schools[0]?.id ?? 0, yearStarted: '', yearFinished: '', level: '', honors: '', gpa: '', lrnNumber: '' },
+        : { schoolId: 0, yearStarted: '', yearFinished: '', level: '', honors: '', gpa: '', lrnNumber: '' },
     )
+    setSchoolQuery(history ? (schoolNameById.get(history.schoolId) ?? '') : '')
+    setIsSchoolSuggestionsOpen(false)
     setEducationModal({ open: true, editing: history })
   }
 
+  const selectSchoolSuggestion = (school: SchoolInfo) => {
+    setEducationForm((current) => ({ ...current, schoolId: school.id }))
+    setSchoolQuery(school.name ?? '')
+    setIsSchoolSuggestionsOpen(false)
+  }
+
+  const sanitizeSchoolName = (raw: string) => {
+    const collapsed = raw.trim().replace(/\s+/g, ' ')
+    // Only title-case when the whole name was typed in lowercase, so
+    // intentional casing (e.g. "STI College", "iAcademy") is left alone.
+    if (collapsed !== collapsed.toLowerCase()) return collapsed
+    return collapsed.replace(/\b\w/g, (c) => c.toUpperCase())
+  }
+
   const handleSaveEducation = async () => {
-    if (!educationForm.schoolId) {
-      addToast('warning', 'School required', 'Select a school for this education record.')
+    const typedName = schoolQuery.trim()
+    if (!typedName) {
+      addToast('warning', 'School required', 'Enter or select a school for this education record.')
       return
     }
 
     setIsSavingEducation(true)
     try {
-      await personsApi.upsertEducationHistory({ id: educationModal.editing?.id, personId, ...educationForm })
+      let schoolId = educationForm.schoolId
+      if (!schoolId) {
+        const exactMatch = schools.find((s) => (s.name ?? '').toLowerCase() === typedName.toLowerCase())
+        if (exactMatch) {
+          schoolId = exactMatch.id
+        } else {
+          const created = await personLookupsApi.createSchool({ name: sanitizeSchoolName(typedName) })
+          schoolId = created.id
+          setSchools((current) => [...current, created])
+        }
+      }
+
+      await personsApi.upsertEducationHistory({ id: educationModal.editing?.id, personId, ...educationForm, schoolId })
       addToast('success', educationModal.editing ? 'Education history updated' : 'Education history added', '')
       setEducationModal({ open: false, editing: null })
       await load()
@@ -704,7 +741,7 @@ export function RecordsDetail() {
         title="Education history"
         action={
           canUpdate && (
-            <Button size="sm" variant="ghost" onClick={() => openEducationModal(null)} disabled={schools.length === 0}>
+            <Button size="sm" variant="ghost" onClick={() => openEducationModal(null)}>
               <Plus className="h-4 w-4" />
               Add
             </Button>
@@ -992,15 +1029,45 @@ export function RecordsDetail() {
         }
       >
         <div className="space-y-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gh-fg">School</label>
-            <select
-              className={selectClassName()}
-              value={educationForm.schoolId}
-              onChange={(e) => setEducationForm({ ...educationForm, schoolId: Number(e.target.value) })}
-            >
-              {schools.map((school) => <option key={school.id} value={school.id}>{school.name}</option>)}
-            </select>
+          <div className="relative flex flex-col gap-1.5">
+            <Input
+              label="School"
+              value={schoolQuery}
+              onChange={(e) => {
+                setSchoolQuery(e.target.value)
+                setEducationForm((current) => ({ ...current, schoolId: 0 }))
+                setIsSchoolSuggestionsOpen(true)
+              }}
+              onFocus={() => setIsSchoolSuggestionsOpen(true)}
+              onBlur={() => setTimeout(() => setIsSchoolSuggestionsOpen(false), 150)}
+              placeholder="Type to search, or enter a new school name"
+              hint={
+                educationForm.schoolId
+                  ? undefined
+                  : "Not in our records? Just type the full name — it'll be added when you save."
+              }
+              autoComplete="off"
+            />
+            {isSchoolSuggestionsOpen && schoolSuggestions.length > 0 && (
+              <div className="absolute top-full z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-gh-border bg-gh-canvas shadow-lg">
+                {schoolSuggestions.map((school) => (
+                  <button
+                    key={school.id}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectSchoolSuggestion(school)}
+                    className="block w-full px-3 py-2 text-left text-sm text-gh-fg transition-colors hover:bg-gh-canvas-subtle"
+                  >
+                    {school.name}
+                    {(school.city || school.province) && (
+                      <span className="ml-1 text-xs text-gh-fg-subtle">
+                        ({[school.city, school.province].filter(Boolean).join(', ')})
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-gh-fg">Level</label>
