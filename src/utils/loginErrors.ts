@@ -89,6 +89,16 @@ function mapStatusAndBody(status: number, raw: string): LoginErrorDetails | null
     return LOGIN_ERROR_MAP.RATE_LIMITED
   }
 
+  if (
+    status === 502 ||
+    status === 503 ||
+    status === 504 ||
+    lower.includes('proxy error') ||
+    lower.includes('econnrefused')
+  ) {
+    return LOGIN_ERROR_MAP.SERVICE_UNAVAILABLE
+  }
+
   if (status === 401 || code.includes('INVALID') || code.includes('UNAUTHORIZED')) {
     return {
       title: 'Sign in failed',
@@ -100,6 +110,7 @@ function mapStatusAndBody(status: number, raw: string): LoginErrorDetails | null
   if (status >= 500) {
     if (code.includes('USER_NOT_FOUND')) return LOGIN_ERROR_MAP.USER_NOT_FOUND
     if (code.includes('INVALID_PASSWORD')) return LOGIN_ERROR_MAP.INVALID_PASSWORD
+    if (code.includes('ACCOUNT_INACTIVE')) return LOGIN_ERROR_MAP.ACCOUNT_INACTIVE
 
     return {
       title: 'Sign-in service error',

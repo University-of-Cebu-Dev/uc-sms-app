@@ -12,7 +12,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // UCSMS.API's own native "https" launch profile.
+      // Use each API's `https` launch profile (Identity :7032, SMS API :7164).
+      // The `http` profiles bind 5135/5286 only; this proxy will then fail with
+      // ECONNREFUSED and the login form shows "sign-in service unavailable".
       '/api': {
         // https, not http: app.UseHttpsRedirection() 307s every HTTP request to its
         // HTTPS port, which took the browser's fetch() straight out of this
